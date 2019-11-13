@@ -1,3 +1,5 @@
+import kotlin.random.Random
+
 open class Matrix {
 
     protected val data: Array<DoubleArray>
@@ -6,10 +8,8 @@ open class Matrix {
 
     @Throws(IllegalArgumentException::class)
     constructor(rows: Int, columns: Int, value: Double = 0.0) {
-        if (rows < 1)
-            throw IllegalArgumentException("Row parameter must be at least 1.")
-        if (columns < 1)
-            throw IllegalArgumentException("Column parameter must be at least 1.")
+        require(rows >= 1) { "Row parameter must be at least 1." }
+        require(columns >= 1) { "Column parameter must be at least 1." }
         m = rows
         n = columns
         data = Array(m) { DoubleArray(n) }
@@ -18,7 +18,6 @@ open class Matrix {
                 data[i][j] = value
     }
 
-    @Throws(IndexOutOfBoundsException::class)
     constructor(values: Array<DoubleArray>) : this(values.size, values[0].size) {
         for (i in 0 until m)
             for (j in 0 until n)
@@ -80,7 +79,7 @@ open class Matrix {
             val A = Matrix(rows, columns)
             for (i in 0 until A.m)
                 for (j in 0 until A.n)
-                    A.data[i][j] = minValue + Math.random() * (maxValue - minValue + 1)
+                    A.data[i][j] = Random.nextDouble(minValue, maxValue)
             return A
         }
     }

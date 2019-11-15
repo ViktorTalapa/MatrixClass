@@ -1,32 +1,13 @@
 import kotlin.random.Random
 
-open class Matrix {
+data class Matrix(protected val data: Array<DoubleArray>) {
 
-    protected val data: Array<DoubleArray>
-    protected val m: Int
-    protected val n: Int
+    protected val m: Int = data.size
+    protected val n: Int = data.first().size
 
-    constructor(values: Array<DoubleArray>) {
-        data = values
-        m = values.size
-        n = values[0].size
-    }
+    constructor(rows: Int, columns: Int, value: Double = 0.0) : this(Array(rows) { DoubleArray(columns) { value } })
 
-    constructor(rows: Int, columns: Int, value: Double = 0.0) {
-        require(rows >= 1) { "Row parameter must be at least 1." }
-        require(columns >= 1) { "Column parameter must be at least 1." }
-        m = rows
-        n = columns
-        data = Array(m) { DoubleArray(n) { value } }
-    }
-
-    constructor(A: Matrix) : this(A.data)
-
-    /*
-    constructor(values: DoubleArray, rows: Int) {
-        TODO
-    }
-    */
+    constructor(matrix: Matrix) : this(matrix.data.copyOf())
 
     operator fun get(i: Int, j: Int): Double {
         return data[i][j]
@@ -36,10 +17,59 @@ open class Matrix {
         data[i][j] = x
     }
 
+    operator fun unaryPlus(): Matrix {
+        return Matrix(this)
+    }
+
+    operator fun unaryMinus(): Matrix {
+        val result = Matrix(m, n)
+        for (i in 0 until m)
+            for (j in 0 until n)
+                result[i, j] = -data[i][j]
+        return result
+    }
+
+    operator fun plus(b: Matrix): Matrix {
+        val result = Matrix(
+            if (m > b.m) m else b.m,
+            if (n > b.n) n else b.n
+        )
+        for (i in 0 until m)
+            for (j in 0 until n)
+                result[i, j] = this[i, j]
+        for (i in 0 until b.m)
+            for (j in 0 until b.n)
+                result[i, j] += b[i, j]
+        return result
+    }
+    operator fun minus(b: Matrix): Matrix {
+        return this.plus(b.unaryMinus())
+    }
+
+    operator fun times(s: Double): Matrix {
+        val result = Matrix(data)
+        for (i in 0 until m)
+            for (j in 0 until n)
+                result[i, j] *= s
+        return result
+    }
+
+    operator fun Double.times(m: Matrix): Matrix {
+        return m.times(this)
+    }
+
+    operator fun div(s: Double): Matrix {
+        return this.times(1 / s)
+    }
+
+    operator fun Double.div(m: Matrix): Matrix {
+        return m.div(this)
+    }
+
     fun getColumn(columnIndex: Int): DoubleArray {
         val column = DoubleArray(m)
         for (i in 0 until m)
-            column[i] = data[i][columnIndex]
+            column[i] = this[i, columnIndex]
         return column
     }
 
@@ -62,49 +92,76 @@ open class Matrix {
     }
 
     fun transpose(): Matrix {
-        val A = Matrix(n, m)
+        val trans = Matrix(n, m)
         for (i in 0 until n)
             for (j in 0 until m)
-                A.data[i][j] = data[j][i]
-        return A
+                trans[i, j] = this[j, i]
+        return trans
     }
 
-    override fun toString(): String {
+    fun toString(trim: Boolean): String {
         val result = StringBuilder()
         for (row in data)
             for (i in 0 until n) {
-                result.append((row[i]))
-                if (i < n - 1)
-                    result.append(',')
+                if (trim)
+                    result.append(row[i].toInt())
                 else
-                    result.append(';')
+                    result.append(row[i])
+                if (i < n - 1)
+                    result.append(' ')
+                else
+                    result.append(System.lineSeparator())
             }
         return result.toString()
+    }
+
+    override fun toString(): String {
+        return this.toString(false)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Matrix
+
+        if (!data.contentDeepEquals(other.data)) return false
+        if (m != other.m) return false
+        if (n != other.n) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = data.contentDeepHashCode()
+        result = 31 * result + m
+        result = 31 * result + n
+        return result
     }
 
     companion object {
 
         fun identity(order: Int): Matrix {
-            val I = Matrix(order, order)
+            val id = Matrix(order, order)
             for (i in 0 until order)
-                I.data[i][i] = 1.0
-            return I
+                id.data[i][i] = 1.0
+            return id
         }
 
         fun generate(rows: Int, columns: Int, minValue: Double, maxValue: Double): Matrix {
-            val A = Matrix(rows, columns)
-            for (i in 0 until A.m)
-                for (j in 0 until A.n)
-                    A[i, j] = Random.nextDouble(minValue, maxValue)
-            return A
+            val result = Matrix(rows, columns)
+            for (i in 0 until rows)
+                for (j in 0 until columns)
+                    result[i, j] = Random.nextDouble(minValue, maxValue)
+            return result
         }
 
         fun generate(rows: Int, columns: Int, minValue: Int = 0, maxValue: Int = 9): Matrix {
-            val A = Matrix(rows, columns)
-            for (i in 0 until A.m)
-                for (j in 0 until A.n)
-                    A[i, j] = Random.nextInt(minValue, maxValue).toDouble()
-            return A
+            val result = Matrix(rows, columns)
+            for (i in 0 until rows)
+                for (j in 0 until columns)
+                    result[i, j] = Random.nextInt(minValue, maxValue).toDouble()
+            return result
         }
     }
 }

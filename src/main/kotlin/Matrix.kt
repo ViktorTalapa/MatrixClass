@@ -1,56 +1,54 @@
-import kotlin.random.Random
+data class Matrix(protected val data: Array<Vector>) {
 
-data class Matrix(protected val data: Array<DoubleArray>) {
+    protected val height: Int = data.size
+    protected val width: Int = data.first().size
 
-    protected val m: Int = data.size
-    protected val n: Int = data.first().size
+    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
 
-    constructor(rows: Int, columns: Int, value: Double = 0.0) : this(Array(rows) { DoubleArray(columns) { value } })
-
-    constructor(matrix: Matrix) : this(matrix.data.copyOf())
+    operator fun get(i: Int): Vector {
+        return data[i]
+    }
 
     operator fun get(i: Int, j: Int): Double {
         return data[i][j]
     }
 
-    operator fun set(i: Int, j: Int, x: Double) {
-        data[i][j] = x
+    operator fun set(i: Int, v: Vector) {
+        require(width == v.size) { "Vector sizes must be the same." }
+        data[i] = v
     }
 
-    operator fun unaryPlus(): Matrix {
-        return Matrix(this)
+    operator fun set(i: Int, j: Int, x: Number) {
+        data[i][j] = x.toDouble()
     }
 
-    operator fun unaryMinus(): Matrix {
-        val result = Matrix(m, n)
-        for (i in 0 until m)
-            for (j in 0 until n)
-                result[i, j] = -data[i][j]
-        return result
+    fun getColumn(columnIndex: Int): Vector {
+        val column = Vector(height)
+        for (i in 0 until height)
+            column[i] = this[i, columnIndex]
+        return column
+    }
+
+    fun getRow(rowIndex: Int): Vector {
+        return this[rowIndex]
     }
 
     operator fun plus(b: Matrix): Matrix {
-        val result = Matrix(
-            if (m > b.m) m else b.m,
-            if (n > b.n) n else b.n
-        )
-        for (i in 0 until m)
-            for (j in 0 until n)
-                result[i, j] = this[i, j]
-        for (i in 0 until b.m)
-            for (j in 0 until b.n)
-                result[i, j] += b[i, j]
+        require(height == b.height && width == b.width) { "Matrices have incompatible sizes for addition." }
+        val result = Matrix(height, width)
+        for (i in 0 until height)
+            result[i] = this[i] + b[i]
         return result
     }
+
     operator fun minus(b: Matrix): Matrix {
         return this.plus(b.unaryMinus())
     }
 
-    operator fun times(s: Double): Matrix {
-        val result = Matrix(data)
-        for (i in 0 until m)
-            for (j in 0 until n)
-                result[i, j] *= s
+    operator fun times(s: Number): Matrix {
+        val result = Matrix(height, width)
+        for (i in 0 until height)
+                result[i] = this[i] * s.toDouble()
         return result
     }
 
@@ -58,43 +56,51 @@ data class Matrix(protected val data: Array<DoubleArray>) {
         return m.times(this)
     }
 
-    operator fun div(s: Double): Matrix {
-        return this.times(1 / s)
+    operator fun times(m: Matrix): Matrix {
+        require(width == m.height) { "Matrices have incompatible sizes for multiplication." }
+        val result = Matrix(height, m.width)
+        for(i in 0 until height)
+            for (j in 0 until m.width)
+                result[i, j] = this.getRow(i) * m.getColumn(j)
+        return result
     }
 
-    operator fun Double.div(m: Matrix): Matrix {
+    operator fun div(s: Number): Matrix {
+        return this.times(1.0 / s.toDouble())
+    }
+
+    operator fun Number.div(m: Matrix): Matrix {
         return m.div(this)
     }
 
-    fun getColumn(columnIndex: Int): DoubleArray {
-        val column = DoubleArray(m)
-        for (i in 0 until m)
-            column[i] = this[i, columnIndex]
-        return column
+    operator fun unaryPlus(): Matrix {
+        return this.times(1)
     }
 
-    fun getRow(rowIndex: Int): DoubleArray {
-        return data[rowIndex]
+    operator fun unaryMinus(): Matrix {
+        return this.times(-1)
+    }
+
+    fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
+        val temp = this[rowIndex1, columnIndex1]
+        this[rowIndex1, columnIndex1] = this[rowIndex2, columnIndex2]
+        this[rowIndex2, columnIndex2] = temp
     }
 
     fun swapColumns(columnIndex1: Int, columnIndex2: Int) {
-        for (i in 0 until m) {
-            val temp = data[i][columnIndex1]
-            data[i][columnIndex1] = data[i][columnIndex2]
-            data[i][columnIndex2] = temp
-        }
+        for (i in 0 until height)
+            swap(i, columnIndex1, i, columnIndex2)
     }
 
     fun swapRows(rowIndex1: Int, rowIndex2: Int) {
-        val temp = data[rowIndex1]
-        data[rowIndex1] = data[rowIndex2]
-        data[rowIndex2] = temp
+        for (i in 0 until width)
+            swap(rowIndex1, i, rowIndex2, i)
     }
 
     fun transpose(): Matrix {
-        val trans = Matrix(n, m)
-        for (i in 0 until n)
-            for (j in 0 until m)
+        val trans = Matrix(width, height)
+        for (i in 0 until width)
+            for (j in 0 until height)
                 trans[i, j] = this[j, i]
         return trans
     }
@@ -102,16 +108,7 @@ data class Matrix(protected val data: Array<DoubleArray>) {
     fun toString(trim: Boolean): String {
         val result = StringBuilder()
         for (row in data)
-            for (i in 0 until n) {
-                if (trim)
-                    result.append(row[i].toInt())
-                else
-                    result.append(row[i])
-                if (i < n - 1)
-                    result.append(' ')
-                else
-                    result.append(System.lineSeparator())
-            }
+            result.append(row.toString(trim)).append(System.lineSeparator())
         return result.toString()
     }
 
@@ -124,19 +121,14 @@ data class Matrix(protected val data: Array<DoubleArray>) {
         if (javaClass != other?.javaClass) return false
 
         other as Matrix
-
-        if (!data.contentDeepEquals(other.data)) return false
-        if (m != other.m) return false
-        if (n != other.n) return false
-
+        if (height != other.height) return false
+        if (width != other.width) return false
+        if (!data.contentEquals(other.data)) return false
         return true
     }
 
     override fun hashCode(): Int {
-        var result = data.contentDeepHashCode()
-        result = 31 * result + m
-        result = 31 * result + n
-        return result
+        return data.contentHashCode()
     }
 
     companion object {
@@ -148,19 +140,10 @@ data class Matrix(protected val data: Array<DoubleArray>) {
             return id
         }
 
-        fun generate(rows: Int, columns: Int, minValue: Double, maxValue: Double): Matrix {
+        fun generate(rows: Int, columns: Int, minValue: Number = 0.0, maxValue: Number = 9.0): Matrix {
             val result = Matrix(rows, columns)
             for (i in 0 until rows)
-                for (j in 0 until columns)
-                    result[i, j] = Random.nextDouble(minValue, maxValue)
-            return result
-        }
-
-        fun generate(rows: Int, columns: Int, minValue: Int = 0, maxValue: Int = 9): Matrix {
-            val result = Matrix(rows, columns)
-            for (i in 0 until rows)
-                for (j in 0 until columns)
-                    result[i, j] = Random.nextInt(minValue, maxValue).toDouble()
+                result[i] = Vector.generate(columns, minValue, maxValue)
             return result
         }
     }

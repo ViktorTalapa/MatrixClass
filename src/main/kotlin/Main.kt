@@ -7,5 +7,7 @@ object Main {
         println(Matrix.generate(7, 5).toString(true))
         println("Here is a 3x4 Random Double Matrix:")
         println(Matrix.generate(7, 5, 100.0, 900.0).toString())
+
+
     }
 }

@@ -1,11 +1,15 @@
-import java.lang.StringBuilder
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.random.Random
 
-data class Vector(private val data: DoubleArray) {
+class Vector(values: List<Double>) {
 
-    val size: Int = data.size
+    private val data: ArrayList<Double> = ArrayList(values)
+    val length: Int = values.size
 
-    constructor(size: Int, value: Number = 0.0) : this(DoubleArray(size) { value.toDouble() } )
+    constructor(values: DoubleArray) : this(values.toList())
+
+    constructor(size: Int, value: Number = 0.0) : this(DoubleArray(size) { value.toDouble() })
 
     operator fun get(i: Int): Double {
         return data[i]
@@ -15,18 +19,18 @@ data class Vector(private val data: DoubleArray) {
         data[i] = x.toDouble()
     }
 
-    operator fun plus(b: Vector): Vector {
-        require(size == b.size) { "Vector sizes must be the same." }
-        val result = Vector(size)
-        for (i in 0 until size)
-            result[i] = this[i] + b[i]
+    operator fun plus(v: Vector): Vector {
+        require(length == v.length) { "Vector sizes must be the same." }
+        val result = Vector(length)
+        for (i in 0 until length)
+            result.data[i] = data[i] + v.data[i]
         return result
     }
 
     operator fun times(s: Number): Vector {
-        val result = Vector(size)
-        for (i in 0 until size)
-            result[i] = this[i] * s.toDouble()
+        val result = Vector(length)
+        for (i in 0 until length)
+            result.data[i] = data[i] * s.toDouble()
         return result
     }
 
@@ -34,10 +38,11 @@ data class Vector(private val data: DoubleArray) {
         return v.times(this)
     }
 
-    operator fun times(v: Vector) : Double {
+    operator fun times(v: Vector): Double {
+        require(length == v.length) { "Vector sizes must be the same." }
         var result = 0.0
-        for (i in 0 until size)
-            result += this[i] + v[i]
+        for (i in 0 until length)
+            result += data[i] + v.data[i]
         return result
     }
 
@@ -57,34 +62,45 @@ data class Vector(private val data: DoubleArray) {
         return this.times(1.0 / s.toDouble())
     }
 
+    fun clone(): Vector {
+        val result = Vector(length)
+        for (i in 0 until length)
+            result.data[i] = data[i]
+        return result
+    }
+
+    fun subVector(startIndex: Int, endIndex: Int): Vector {
+        require(startIndex in 0..endIndex && endIndex < length) {
+            "Subvector boundaries should be within the vector."
+        }
+        return Vector(data.subList(startIndex, endIndex))
+    }
+
+    fun subVector(cells: IntRange): Vector {
+        return subVector(cells.first, cells.last)
+    }
+
+    fun subVector(cells: SortedSet<Int>): Vector {
+        val result = Vector(cells.size)
+        for (i in 0 until cells.size)
+            result.data[i] = data[cells.elementAt(i)]
+        return result
+    }
+
     fun swap(index1: Int, index2: Int) {
         val temp = data[index1]
         data[index1] = data[index2]
         data[index2] = temp
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Vector
-        if (size != other.size) return false
-        if (!data.contentEquals(other.data)) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return data.contentHashCode()
-    }
-
     fun toString(trim: Boolean): String {
         val result = StringBuilder()
-        for (i in 0 until size) {
+        for (i in 0 until length) {
             if (trim)
                 result.append(data[i].toInt())
             else
                 result.append(data[i])
-            if (i < size - 1)
+            if (i < length - 1)
                 result.append(' ')
         }
         return result.toString()
@@ -96,10 +112,10 @@ data class Vector(private val data: DoubleArray) {
 
     companion object {
 
-        fun generate(size: Int, minValue: Number = 0.0, maxValue: Number = 9.0): Vector {
+        fun generate(size: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Vector {
             val result = Vector(size)
             for (i in 0 until size)
-                    result[i] = Random.nextDouble(minValue.toDouble(), maxValue.toDouble())
+                result[i] = Random.nextDouble(minValue.toDouble(), maxValue.toDouble())
             return result
         }
     }

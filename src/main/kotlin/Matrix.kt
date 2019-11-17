@@ -1,21 +1,25 @@
-data class Matrix(protected val data: Array<Vector>) {
+import java.util.*
+import kotlin.collections.ArrayList
 
-    protected val height: Int = data.size
-    protected val width: Int = data.first().size
+open class Matrix(values: List<Vector>) {
+
+    protected val data: ArrayList<Vector> = ArrayList(values)
+    val height: Int = values.size
+    val width: Int = values.first().length
+
+    init {
+        for (row in values)
+            require(width == row.length) { "Matrix rows must be in equal sizes." }
+    }
+
+    constructor(values: Array<Vector>) : this(values.toList())
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
 
-    operator fun get(i: Int): Vector {
-        return data[i]
-    }
+    constructor(m: Matrix) : this(m.data)
 
     operator fun get(i: Int, j: Int): Double {
         return data[i][j]
-    }
-
-    operator fun set(i: Int, v: Vector) {
-        require(width == v.size) { "Vector sizes must be the same." }
-        data[i] = v
     }
 
     operator fun set(i: Int, j: Int, x: Number) {
@@ -25,19 +29,19 @@ data class Matrix(protected val data: Array<Vector>) {
     fun getColumn(columnIndex: Int): Vector {
         val column = Vector(height)
         for (i in 0 until height)
-            column[i] = this[i, columnIndex]
+            column[i] = data[i][columnIndex]
         return column
     }
 
     fun getRow(rowIndex: Int): Vector {
-        return this[rowIndex]
+        return data[rowIndex]
     }
 
-    operator fun plus(b: Matrix): Matrix {
-        require(height == b.height && width == b.width) { "Matrices have incompatible sizes for addition." }
+    operator fun plus(m: Matrix): Matrix {
+        require(height == m.height && width == m.width) { "Matrices have incompatible sizes for addition." }
         val result = Matrix(height, width)
         for (i in 0 until height)
-            result[i] = this[i] + b[i]
+            result.data[i] = data[i] + m.data[i]
         return result
     }
 
@@ -48,7 +52,7 @@ data class Matrix(protected val data: Array<Vector>) {
     operator fun times(s: Number): Matrix {
         val result = Matrix(height, width)
         for (i in 0 until height)
-                result[i] = this[i] * s.toDouble()
+            result.data[i] = data[i] * s.toDouble()
         return result
     }
 
@@ -59,9 +63,9 @@ data class Matrix(protected val data: Array<Vector>) {
     operator fun times(m: Matrix): Matrix {
         require(width == m.height) { "Matrices have incompatible sizes for multiplication." }
         val result = Matrix(height, m.width)
-        for(i in 0 until height)
+        for (i in 0 until height)
             for (j in 0 until m.width)
-                result[i, j] = this.getRow(i) * m.getColumn(j)
+                result.data[i][j] = this.getRow(i) * m.getColumn(j)
         return result
     }
 
@@ -81,6 +85,24 @@ data class Matrix(protected val data: Array<Vector>) {
         return this.times(-1)
     }
 
+    fun clone(): Matrix {
+        val result = Matrix(height, width)
+        for (i in 0 until height)
+            result.data[i] = data[i].clone()
+        return result
+    }
+
+    fun subMatrix(rows: SortedSet<Int>, columns: SortedSet<Int>): Matrix {
+        require(rows.last() <= height && columns.last() <= width) {
+            "Submatrix boundaries should be within the matrix."
+        }
+        val result = Matrix(rows.size, columns.size)
+        for (i in 0 until rows.size)
+            for (j in 0 until columns.size)
+                result.data[i][j] = data[rows.elementAt(i)][columns.elementAt(j)]
+        return result
+    }
+
     fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
         val temp = this[rowIndex1, columnIndex1]
         this[rowIndex1, columnIndex1] = this[rowIndex2, columnIndex2]
@@ -98,11 +120,11 @@ data class Matrix(protected val data: Array<Vector>) {
     }
 
     fun transpose(): Matrix {
-        val trans = Matrix(width, height)
+        val result = Matrix(width, height)
         for (i in 0 until width)
             for (j in 0 until height)
-                trans[i, j] = this[j, i]
-        return trans
+                result.data[i][j] = data[j][i]
+        return result
     }
 
     fun toString(trim: Boolean): String {
@@ -116,34 +138,19 @@ data class Matrix(protected val data: Array<Vector>) {
         return this.toString(false)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Matrix
-        if (height != other.height) return false
-        if (width != other.width) return false
-        if (!data.contentEquals(other.data)) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return data.contentHashCode()
-    }
-
     companion object {
 
-        fun identity(order: Int): Matrix {
-            val id = Matrix(order, order)
+        fun identity(order: Int): SquareMatrix {
+            val result = SquareMatrix(order)
             for (i in 0 until order)
-                id.data[i][i] = 1.0
-            return id
+                result.data[i][i] = 1.0
+            return result
         }
 
-        fun generate(rows: Int, columns: Int, minValue: Number = 0.0, maxValue: Number = 9.0): Matrix {
+        fun generate(rows: Int, columns: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Matrix {
             val result = Matrix(rows, columns)
             for (i in 0 until rows)
-                result[i] = Vector.generate(columns, minValue, maxValue)
+                result.data[i] = Vector.generate(columns, minValue, maxValue)
             return result
         }
     }

@@ -1,7 +1,7 @@
 import java.util.*
 import kotlin.collections.ArrayList
 
-open class Matrix(values: List<Vector>) {
+open class Matrix(values: Collection<Vector>) {
 
     protected val data: ArrayList<Vector> = ArrayList(values)
     val height: Int = values.size
@@ -12,11 +12,7 @@ open class Matrix(values: List<Vector>) {
             require(width == row.length) { "Matrix rows must be in equal sizes." }
     }
 
-    constructor(values: Array<Vector>) : this(values.toList())
-
-    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
-
-    constructor(m: Matrix) : this(m.data)
+    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) }.asList())
 
     operator fun get(i: Int, j: Int): Double {
         return data[i][j]
@@ -45,8 +41,8 @@ open class Matrix(values: List<Vector>) {
         return result
     }
 
-    operator fun minus(b: Matrix): Matrix {
-        return this.plus(b.unaryMinus())
+    operator fun minus(m: Matrix): Matrix {
+        return this.plus(m.unaryMinus())
     }
 
     operator fun times(s: Number): Matrix {
@@ -92,15 +88,25 @@ open class Matrix(values: List<Vector>) {
         return result
     }
 
-    fun subMatrix(rows: SortedSet<Int>, columns: SortedSet<Int>): Matrix {
-        require(rows.last() <= height && columns.last() <= width) {
+    fun subMatrix(rowIndexes: Collection<Int>, columnIndexes: Collection<Int>): Matrix {
+        val rIndexes = rowIndexes.toSortedSet(Comparator.naturalOrder())
+        val cIndexes = columnIndexes.toSortedSet(Comparator.naturalOrder())
+        require(rIndexes.first() >= 0 && cIndexes.first() >= 0 && rIndexes.last() < height && cIndexes.last() < width) {
             "Submatrix boundaries should be within the matrix."
         }
-        val result = Matrix(rows.size, columns.size)
-        for (i in 0 until rows.size)
-            for (j in 0 until columns.size)
-                result.data[i][j] = data[rows.elementAt(i)][columns.elementAt(j)]
+        val result = Matrix(rIndexes.size, cIndexes.size)
+        for (i in rIndexes.indices)
+            for (j in cIndexes.indices)
+                result.data[i][j] = data[rIndexes.elementAt(i)][cIndexes.elementAt(j)]
         return result
+    }
+
+    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange): Matrix {
+        return subMatrix(rowIndexes.toSet(), columnIndexes.toSet())
+    }
+
+    fun subMatrix(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int): Matrix {
+        return subMatrix(IntRange(rowIndex1, rowIndex2), IntRange(columnIndex1, columnIndex2))
     }
 
     fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
@@ -136,22 +142,5 @@ open class Matrix(values: List<Vector>) {
 
     override fun toString(): String {
         return this.toString(false)
-    }
-
-    companion object {
-
-        fun identity(order: Int): SquareMatrix {
-            val result = SquareMatrix(order)
-            for (i in 0 until order)
-                result.data[i][i] = 1.0
-            return result
-        }
-
-        fun generate(rows: Int, columns: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Matrix {
-            val result = Matrix(rows, columns)
-            for (i in 0 until rows)
-                result.data[i] = Vector.generate(columns, minValue, maxValue)
-            return result
-        }
     }
 }

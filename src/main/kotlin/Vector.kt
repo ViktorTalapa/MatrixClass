@@ -2,14 +2,12 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.random.Random
 
-class Vector(values: List<Double>) {
+class Vector(values: Collection<Double>) {
 
     private val data: ArrayList<Double> = ArrayList(values)
     val length: Int = values.size
 
-    constructor(values: DoubleArray) : this(values.toList())
-
-    constructor(size: Int, value: Number = 0.0) : this(DoubleArray(size) { value.toDouble() })
+    constructor(size: Int, value: Number = 0.0) : this(DoubleArray(size) { value.toDouble() }.asList())
 
     operator fun get(i: Int): Double {
         return data[i]
@@ -69,22 +67,23 @@ class Vector(values: List<Double>) {
         return result
     }
 
-    fun subVector(startIndex: Int, endIndex: Int): Vector {
-        require(startIndex in 0..endIndex && endIndex < length) {
+    fun subVector(cellIndexes: Collection<Int>): Vector {
+        val indexes = cellIndexes.toSortedSet(Comparator.naturalOrder())
+        require(indexes.first() <= 0 && indexes.last() < length) {
             "Subvector boundaries should be within the vector."
         }
-        return Vector(data.subList(startIndex, endIndex))
+        val result = Vector(indexes.size)
+        for (i in 0 until indexes.size)
+            result.data[i] = data[indexes.elementAt(i)]
+        return result
     }
 
     fun subVector(cells: IntRange): Vector {
-        return subVector(cells.first, cells.last)
+        return subVector(cells.toSet())
     }
 
-    fun subVector(cells: SortedSet<Int>): Vector {
-        val result = Vector(cells.size)
-        for (i in 0 until cells.size)
-            result.data[i] = data[cells.elementAt(i)]
-        return result
+    fun subVector(startIndex: Int, endIndex: Int): Vector {
+        return subVector(IntRange(startIndex, endIndex))
     }
 
     fun swap(index1: Int, index2: Int) {
@@ -112,7 +111,7 @@ class Vector(values: List<Double>) {
 
     companion object {
 
-        fun generate(size: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Vector {
+        fun generateRandom(size: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Vector {
             val result = Vector(size)
             for (i in 0 until size)
                 result[i] = Random.nextDouble(minValue.toDouble(), maxValue.toDouble())

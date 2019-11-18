@@ -3,7 +3,7 @@ import kotlin.collections.ArrayList
 
 open class Matrix(values: Collection<Vector>) {
 
-    protected val data: ArrayList<Vector> = ArrayList(values)
+    private val data: ArrayList<Vector> = ArrayList(values)
     val height: Int = values.size
     val width: Int = values.first().length
 
@@ -88,7 +88,7 @@ open class Matrix(values: Collection<Vector>) {
         return result
     }
 
-    fun subMatrix(rowIndexes: Collection<Int>, columnIndexes: Collection<Int>): Matrix {
+    open fun subMatrix(rowIndexes: Collection<Int>, columnIndexes: Collection<Int>): Matrix {
         val rIndexes = rowIndexes.toSortedSet(Comparator.naturalOrder())
         val cIndexes = columnIndexes.toSortedSet(Comparator.naturalOrder())
         require(rIndexes.first() >= 0 && cIndexes.first() >= 0 && rIndexes.last() < height && cIndexes.last() < width) {
@@ -131,6 +131,10 @@ open class Matrix(values: Collection<Vector>) {
             for (j in 0 until height)
                 result.data[i][j] = data[j][i]
         return result
+    }
+
+    fun toList(): List<Vector> {
+        return data.toList()
     }
 
     fun toString(trim: Boolean): String {

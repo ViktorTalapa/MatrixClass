@@ -92,6 +92,10 @@ class Vector(values: Collection<Double>) {
         data[index2] = temp
     }
 
+    fun toList(): List<Double> {
+        return data.toList()
+    }
+
     fun toString(trim: Boolean): String {
         val result = StringBuilder()
         for (i in 0 until length) {

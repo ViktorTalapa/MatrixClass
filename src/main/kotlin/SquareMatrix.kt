@@ -1,15 +1,23 @@
-class SquareMatrix(values: List<Vector>) : Matrix(values) {
+import kotlin.math.sign
+
+class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     init {
         require(height == width) { "Square Matrix rows and columns must have equal sizes." }
     }
 
-    constructor(values: Array<Vector>) : this(values.toList())
+    constructor(order: Int, value: Number = 0.0) : this(Array(order) { Vector(order, value) }.asList())
 
-    constructor(order: Int, value: Number = 0.0) : this(Array(order) { Vector(order, value) })
 
     fun determinant(): Double {
-        return 0.0
+        if (height == 1)
+            return this[0, 0]
+        var sum = 0.0
+        for (i in 0 until height) {
+            val range = (0 until height).toSet() - i
+            sum += sign(i.toDouble()) * this[0, i] * SquareMatrix(subMatrix(range, range).toList()).determinant()
+        }
+        return sum
     }
 
 }

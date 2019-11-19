@@ -67,10 +67,6 @@ open class Matrix(values: Collection<Vector>) {
         return this.times(1.0 / s.toDouble())
     }
 
-    operator fun Number.div(m: Matrix): Matrix {
-        return m.div(this)
-    }
-
     operator fun unaryPlus(): Matrix {
         return this.times(1)
     }
@@ -86,7 +82,7 @@ open class Matrix(values: Collection<Vector>) {
         return result
     }
 
-    open fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
+    fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
         require(rowIndexes.first() in 0..rowIndexes.last() && rowIndexes.last() < height &&
                 columnIndexes.first() in 0..columnIndexes.last() && columnIndexes.last() < width) {
             "Submatrix boundaries should be within the matrix."

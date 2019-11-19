@@ -15,21 +15,23 @@ class VectorTest {
 
     @Test
     fun set() {
-        v[2] = 15
-        assertEquals(v[2], 15.0, delta)
+        u[3] = 22
+        v[2] = u[3]
+        assertEquals(u[3], 22.0, delta)
+        assertEquals(v[2], 22.0, delta)
     }
 
     @Test
     fun plus() {
-        assertArrayEquals((u + v).toArray(), doubleArrayOf(6.0, 7.8, 9.1, 9.87, 7.3), delta)
+        assertArrayEquals((u + v).toDoubleArray(), doubleArrayOf(6.0, 7.8, 9.1, 9.87, 7.3), delta)
     }
 
     @Test
     fun timesScalar() {
         val w = v * 5
         val x = 5 * v
-        assertArrayEquals(w.toArray(), doubleArrayOf(25.0, 29.0, 30.5, 29.35, 11.5), delta)
-        assertArrayEquals(w.toArray(), x.toArray(), delta)
+        assertArrayEquals(w.toDoubleArray(), doubleArrayOf(25.0, 29.0, 30.5, 29.35, 11.5), delta)
+        assertArrayEquals(w.toDoubleArray(), x.toDoubleArray(), delta)
     }
 
     @Test
@@ -39,28 +41,28 @@ class VectorTest {
 
     @Test
     fun unary() {
-        assertArrayEquals((+u).toArray(), u.toArray(), delta)
-        assertArrayEquals((-u).toArray(), doubleArrayOf(-1.0, -2.0, -3.0, -4.0, -5.0), delta)
+        assertArrayEquals((+u).toDoubleArray(), u.toDoubleArray(), delta)
+        assertArrayEquals((-u).toDoubleArray(), doubleArrayOf(-1.0, -2.0, -3.0, -4.0, -5.0), delta)
     }
 
     @Test
     fun minus() {
         val w = u - v
         val x = u + -1 * v
-        assertArrayEquals(w.toArray(), x.toArray(), delta)
+        assertArrayEquals(w.toDoubleArray(), x.toDoubleArray(), delta)
     }
 
     @Test
     fun div() {
         val w = u / 5
         val x = u * 0.2
-        assertArrayEquals(w.toArray(), x.toArray(), delta)
+        assertArrayEquals(w.toDoubleArray(), x.toDoubleArray(), delta)
     }
 
     @Test
     fun round() {
         val w = v.roundValues()
-        assertArrayEquals(v.toArray(), doubleArrayOf(5.0, 6.0, 6.0, 6.0, 2.0), delta)
+        assertArrayEquals(v.toDoubleArray(), doubleArrayOf(5.0, 6.0, 6.0, 6.0, 2.0), delta)
         assertArrayEquals(w.toLongArray(), longArrayOf(5, 6, 6, 6, 2))
     }
 
@@ -69,14 +71,14 @@ class VectorTest {
         val a = u.subVector(2, 4)
         val b = u.subVector(1..3)
         val c = u.subVector(sortedSetOf(0, 4, 3))
-        assertArrayEquals(a.toArray(), doubleArrayOf(3.0, 4.0, 5.0), delta)
-        assertArrayEquals(b.toArray(), doubleArrayOf(2.0, 3.0, 4.0), delta)
-        assertArrayEquals(c.toArray(), doubleArrayOf(1.0, 4.0, 5.0), delta)
+        assertArrayEquals(a.toDoubleArray(), doubleArrayOf(3.0, 4.0, 5.0), delta)
+        assertArrayEquals(b.toDoubleArray(), doubleArrayOf(2.0, 3.0, 4.0), delta)
+        assertArrayEquals(c.toDoubleArray(), doubleArrayOf(1.0, 4.0, 5.0), delta)
     }
 
     @Test
     fun swap() {
         u.swap(0, 4)
-        assertArrayEquals(u.toArray(), doubleArrayOf(5.0, 2.0, 3.0, 4.0, 1.0), delta)
+        assertArrayEquals(u.toDoubleArray(), doubleArrayOf(5.0, 2.0, 3.0, 4.0, 1.0), delta)
     }
 }

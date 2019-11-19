@@ -27,23 +27,23 @@ class Vector(values: Collection<Number>) {
 
     operator fun plus(v: Vector): Vector {
         require(length == v.length) { "Vector sizes must be the same." }
-        val result = ArrayList<Double>()
-        for (i in 0 until length)
-            result.add(data[i] + v.data[i])
-        return Vector(result)
+        val result = Vector(length)
+        for (i in data.indices)
+            result.data[i] = data[i] + v.data[i]
+        return result
     }
 
     operator fun times(s: Number): Vector {
-        val result = ArrayList<Double>()
-        for (i in 0 until length)
-            result.add(data[i] * s.toDouble())
-        return Vector(result)
+        val result = Vector(length)
+        for (i in data.indices)
+            result.data[i] = data[i] * s.toDouble()
+        return result
     }
 
     operator fun times(v: Vector): Double {
         require(length == v.length) { "Vector sizes must be the same." }
         var result = 0.0
-        for (i in 0 until length)
+        for (i in data.indices)
             result += data[i] * v.data[i]
         return result
     }
@@ -65,10 +65,7 @@ class Vector(values: Collection<Number>) {
     }
 
     fun clone(): Vector {
-        val result = Vector(length)
-        for (i in 0 until length)
-            result.data[i] = data[i]
-        return result
+        return Vector(data.toList())
     }
 
     fun roundValues(): List<Long> {
@@ -86,8 +83,8 @@ class Vector(values: Collection<Number>) {
             "Subvector boundaries are invalid."
         }
         val result = ArrayList<Double>()
-        for (cell in cellIndexes)
-            result.add(data[cell])
+        for (index in cellIndexes)
+            result.add(data[index])
         return Vector(result)
     }
 
@@ -95,8 +92,8 @@ class Vector(values: Collection<Number>) {
         return subVector(cells.toSortedSet())
     }
 
-    fun subVector(startIndex: Int, endIndex: Int): Vector {
-        return subVector(startIndex..endIndex)
+    fun subVector(fromIndex: Int, toIndex: Int): Vector {
+        return subVector(fromIndex..toIndex)
     }
 
     fun swap(index1: Int, index2: Int) {
@@ -109,7 +106,7 @@ class Vector(values: Collection<Number>) {
         return data.toList()
     }
 
-    fun toArray(): DoubleArray {
+    fun toDoubleArray(): DoubleArray {
         return data.toDoubleArray()
     }
 

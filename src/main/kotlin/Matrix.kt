@@ -3,13 +3,15 @@ import kotlin.collections.ArrayList
 
 open class Matrix(values: Collection<Vector>) {
 
-    private val data: ArrayList<Vector> = ArrayList(values)
+    private val data: ArrayList<Vector> = ArrayList()
     val height: Int = values.size
-    val width: Int = values.first().length
+    val width: Int = if(values.isEmpty()) 0 else values.first().length
 
     init {
-        for (row in values)
+        for (row in values) {
             require(width == row.length) { "Matrix rows must be in equal sizes." }
+            data.add(row)
+        }
     }
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) }.asList())
@@ -52,10 +54,6 @@ open class Matrix(values: Collection<Vector>) {
         return result
     }
 
-    operator fun Double.times(m: Matrix): Matrix {
-        return m.times(this)
-    }
-
     operator fun times(m: Matrix): Matrix {
         require(width == m.height) { "Matrices have incompatible sizes for multiplication." }
         val result = Matrix(height, m.width)
@@ -88,25 +86,24 @@ open class Matrix(values: Collection<Vector>) {
         return result
     }
 
-    open fun subMatrix(rowIndexes: Collection<Int>, columnIndexes: Collection<Int>): Matrix {
-        val rIndexes = rowIndexes.toSortedSet(Comparator.naturalOrder())
-        val cIndexes = columnIndexes.toSortedSet(Comparator.naturalOrder())
-        require(rIndexes.first() >= 0 && cIndexes.first() >= 0 && rIndexes.last() < height && cIndexes.last() < width) {
+    open fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
+        require(rowIndexes.first() in 0..rowIndexes.last() && rowIndexes.last() < height &&
+                columnIndexes.first() in 0..columnIndexes.last() && columnIndexes.last() < width) {
             "Submatrix boundaries should be within the matrix."
         }
-        val result = Matrix(rIndexes.size, cIndexes.size)
-        for (i in rIndexes.indices)
-            for (j in cIndexes.indices)
-                result.data[i][j] = data[rIndexes.elementAt(i)][cIndexes.elementAt(j)]
+        val result = Matrix(rowIndexes.size, columnIndexes.size)
+        for (i in rowIndexes.indices)
+            for (j in rowIndexes.indices)
+                result.data[i][j] = data[rowIndexes.elementAt(i)][columnIndexes.elementAt(j)]
         return result
     }
 
     fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange): Matrix {
-        return subMatrix(rowIndexes.toSet(), columnIndexes.toSet())
+        return subMatrix(rowIndexes.toSortedSet(), columnIndexes.toSortedSet())
     }
 
     fun subMatrix(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int): Matrix {
-        return subMatrix(IntRange(rowIndex1, rowIndex2), IntRange(columnIndex1, columnIndex2))
+        return subMatrix(rowIndex1..rowIndex2, columnIndex1..columnIndex2)
     }
 
     fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
@@ -147,4 +144,29 @@ open class Matrix(values: Collection<Vector>) {
     override fun toString(): String {
         return this.toString(false)
     }
+
+    companion object {
+
+        fun generateDiagonal(values: Collection<Double>): SquareMatrix {
+            val result = SquareMatrix(values.size)
+            for (i in values.indices)
+                result[i, i] = values.elementAt(i)
+            return result
+        }
+
+        fun generateIdentity(order: Int): SquareMatrix {
+            return generateDiagonal(DoubleArray(order) { 1.0 }.asList())
+        }
+
+        fun generateRandom(rows: Int, columns: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Matrix {
+            val result = ArrayList<Vector>()
+            for (i in 0 until rows)
+                result.add(Vector.generateRandom(columns, minValue, maxValue))
+            return Matrix(result)
+        }
+    }
+}
+
+operator fun Number.times(m: Matrix): Matrix {
+    return m.times(this)
 }

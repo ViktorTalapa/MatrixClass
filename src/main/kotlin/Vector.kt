@@ -1,13 +1,21 @@
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToLong
 import kotlin.random.Random
 
-class Vector(values: Collection<Double>) {
+class Vector(values: Collection<Number>) {
 
-    private val data: ArrayList<Double> = ArrayList(values)
+    private val data: ArrayList<Double> = ArrayList()
     val length: Int = values.size
 
-    constructor(size: Int, value: Number = 0.0) : this(DoubleArray(size) { value.toDouble() }.asList())
+    init {
+        for (cell in values)
+            data.add(cell.toDouble())
+    }
+
+    constructor(values: Array<Number>) : this(values.asList())
+
+    constructor(size: Int, value: Number = 0.0) : this(Array<Number>(size) { value })
 
     operator fun get(i: Int): Double {
         return data[i]
@@ -19,28 +27,24 @@ class Vector(values: Collection<Double>) {
 
     operator fun plus(v: Vector): Vector {
         require(length == v.length) { "Vector sizes must be the same." }
-        val result = Vector(length)
+        val result = ArrayList<Double>()
         for (i in 0 until length)
-            result.data[i] = data[i] + v.data[i]
-        return result
+            result.add(data[i] + v.data[i])
+        return Vector(result)
     }
 
     operator fun times(s: Number): Vector {
-        val result = Vector(length)
+        val result = ArrayList<Double>()
         for (i in 0 until length)
-            result.data[i] = data[i] * s.toDouble()
-        return result
-    }
-
-    operator fun Number.times(v: Vector): Vector {
-        return v.times(this)
+            result.add(data[i] * s.toDouble())
+        return Vector(result)
     }
 
     operator fun times(v: Vector): Double {
         require(length == v.length) { "Vector sizes must be the same." }
         var result = 0.0
         for (i in 0 until length)
-            result += data[i] + v.data[i]
+            result += data[i] * v.data[i]
         return result
     }
 
@@ -52,8 +56,8 @@ class Vector(values: Collection<Double>) {
         return this.times(-1)
     }
 
-    operator fun minus(b: Vector): Vector {
-        return this.plus(b.unaryMinus())
+    operator fun minus(v: Vector): Vector {
+        return this.plus(v.unaryMinus())
     }
 
     operator fun div(s: Number): Vector {
@@ -67,23 +71,32 @@ class Vector(values: Collection<Double>) {
         return result
     }
 
-    fun subVector(cellIndexes: Collection<Int>): Vector {
-        val indexes = cellIndexes.toSortedSet(Comparator.naturalOrder())
-        require(indexes.first() <= 0 && indexes.last() < length) {
-            "Subvector boundaries should be within the vector."
+    fun roundValues(): List<Long> {
+        val round = ArrayList<Long>()
+        for (i in data.indices) {
+            val n = data[i].roundToLong()
+            data[i] = n.toDouble()
+            round.add(n)
         }
-        val result = Vector(indexes.size)
-        for (i in 0 until indexes.size)
-            result.data[i] = data[indexes.elementAt(i)]
-        return result
+        return round
+    }
+
+    fun subVector(cellIndexes: SortedSet<Int>): Vector {
+        require(cellIndexes.first() in 0..cellIndexes.last() && cellIndexes.last() < length) {
+            "Subvector boundaries are invalid."
+        }
+        val result = ArrayList<Double>()
+        for (cell in cellIndexes)
+            result.add(data[cell])
+        return Vector(result)
     }
 
     fun subVector(cells: IntRange): Vector {
-        return subVector(cells.toSet())
+        return subVector(cells.toSortedSet())
     }
 
     fun subVector(startIndex: Int, endIndex: Int): Vector {
-        return subVector(IntRange(startIndex, endIndex))
+        return subVector(startIndex..endIndex)
     }
 
     fun swap(index1: Int, index2: Int) {
@@ -96,17 +109,20 @@ class Vector(values: Collection<Double>) {
         return data.toList()
     }
 
+    fun toArray(): DoubleArray {
+        return data.toDoubleArray()
+    }
+
     fun toString(trim: Boolean): String {
-        val result = StringBuilder()
+        val result = StringBuilder("| ")
         for (i in 0 until length) {
             if (trim)
-                result.append(data[i].toInt())
+                result.append(data[i].toString().split('.').first())
             else
                 result.append(data[i])
-            if (i < length - 1)
-                result.append(' ')
+            result.append(' ')
         }
-        return result.toString()
+        return result.append('|').toString()
     }
 
     override fun toString(): String {
@@ -115,11 +131,19 @@ class Vector(values: Collection<Double>) {
 
     companion object {
 
-        fun generateRandom(size: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE): Vector {
-            val result = Vector(size)
+        fun generateRandom(
+            size: Int,
+            minValue: Number = Double.MIN_VALUE,
+            maxValue: Number = Double.MAX_VALUE
+        ): Vector {
+            val result = ArrayList<Double>()
             for (i in 0 until size)
-                result[i] = Random.nextDouble(minValue.toDouble(), maxValue.toDouble())
-            return result
+                result.add(Random.nextDouble(minValue.toDouble(), maxValue.toDouble()))
+            return Vector(result)
         }
     }
+}
+
+operator fun Number.times(v: Vector): Vector {
+    return v.times(this)
 }

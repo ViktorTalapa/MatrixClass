@@ -21,16 +21,17 @@ open class Matrix(values: Collection<Vector>) {
 
     constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> Vector(values[i]) })
 
-    constructor(values: List<Number>, rows: Int) : this(ArrayList<Vector>()) {
-        //TODO
-    }
+    constructor(
+        values: List<Number>,
+        rows: Int
+    ) : this(Array(rows) { i -> Vector(values.subList(i * values.size / rows, (i + 1) * values.size / rows)) })
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
 
     operator fun get(i: Int, j: Int): Double = data[i][j]
 
     operator fun set(i: Int, j: Int, x: Number) {
-        data[i][j] = x.toDouble()
+        data[i][j] = x
     }
 
     fun column(columnIndex: Int): Vector {
@@ -42,7 +43,7 @@ open class Matrix(values: Collection<Vector>) {
 
     fun row(rowIndex: Int): Vector = data[rowIndex]
 
-    operator fun plus(m: Matrix): Matrix {
+    open operator fun plus(m: Matrix): Matrix {
         require(height == m.height && width == m.width) { "Matrices have incompatible sizes for addition." }
         return Matrix(Array(height) { i -> data[i] + m.data[i] })
     }
@@ -51,12 +52,7 @@ open class Matrix(values: Collection<Vector>) {
 
     operator fun times(m: Matrix): Matrix {
         require(width == m.height) { "Matrices have incompatible sizes for multiplication." }
-        val result = Matrix(height, m.width)
-        for (i in 0 until height)
-            for (j in 0 until m.width)
-                result.data[i][j] = row(i) * m.column(j)
-        return result
-        //return Matrix(Array(height) { i -> Vector(Array(m.width) { j -> row(i) * m.column(j)})})
+        return Matrix(Array(height) { i -> Vector(Array(m.width) { j -> row(i) * m.column(j) }) })
     }
 
     operator fun div(s: Number): Matrix = this.times(1 / s.toDouble())
@@ -67,13 +63,27 @@ open class Matrix(values: Collection<Vector>) {
 
     operator fun minus(m: Matrix): Matrix = this.plus(m.unaryMinus())
 
+    override fun equals(other: Any?): Boolean {
+        if (other is Matrix) {
+           if (height != other.height || width != other.width)
+               return false
+            for (i in 0 until height)
+                if (!data[i].equals(other.data[i]))
+                    return false
+            return true
+        }
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        return data.hashCode()
+    }
+
     fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
         require(
             rowIndexes.first() in 0..rowIndexes.last() && rowIndexes.last() < height &&
                     columnIndexes.first() in 0..columnIndexes.last() && columnIndexes.last() < width
-        ) {
-            "Submatrix boundaries should be within the matrix."
-        }
+        ) { "Submatrix boundaries should be within the matrix." }
         val result = Matrix(rowIndexes.size, columnIndexes.size)
         for (i in rowIndexes.indices)
             for (j in rowIndexes.indices)
@@ -96,7 +106,7 @@ open class Matrix(values: Collection<Vector>) {
 
     fun swapColumns(columnIndex1: Int, columnIndex2: Int) {
         for (i in 0 until height)
-            swap(i, columnIndex1, i, columnIndex1)
+            swap(i, columnIndex1, i, columnIndex2)
     }
 
     fun swapRows(rowIndex1: Int, rowIndex2: Int) {
@@ -104,9 +114,7 @@ open class Matrix(values: Collection<Vector>) {
             swap(rowIndex1, i, rowIndex2, i)
     }
 
-    fun transpose(): Matrix = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }.asList()) })
-
-    fun to2DArray(): Array<Array<Double>> = Array(height) { i -> Array(width) { j -> data[i][j] } }
+    fun transpose(): Matrix = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
 
     fun toArray(): Array<Vector> = Array(height) { i -> data[i] }
 

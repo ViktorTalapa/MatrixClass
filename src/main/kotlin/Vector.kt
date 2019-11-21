@@ -26,12 +26,7 @@ class Vector(values: Array<Double>) {
         return Vector(Array(size) { i -> data[i] + v.data[i] })
     }
 
-    operator fun times(s: Number): Vector {
-        val result = Vector(size)
-        for (i in 0 until size)
-            result.data[i] = data[i] * s.toDouble()
-        return result
-    }
+    operator fun times(s: Number): Vector = Vector(Array(size) { i -> data[i] * s.toDouble() })
 
     operator fun times(v: Vector): Double {
         require(size == v.size) { "Vector sizes must be the same." }
@@ -48,6 +43,22 @@ class Vector(values: Array<Double>) {
     operator fun minus(v: Vector): Vector = this.plus(v.unaryMinus())
 
     operator fun div(s: Number): Vector = this.times(1.0 / s.toDouble())
+
+    override fun equals(other: Any?): Boolean {
+        if (other is Vector) {
+            if (size != other.size)
+                return false
+            for (i in 0 until size)
+                if (data[i] != other.data[i])
+                    return false
+            return true
+        }
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        return data.hashCode()
+    }
 
     fun subVector(cellIndexes: SortedSet<Int>): Vector {
         require(cellIndexes.first() in 0..cellIndexes.last() && cellIndexes.last() < size) {

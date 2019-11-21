@@ -43,7 +43,6 @@ class VectorTest : MyTest() {
     @Test
     fun div() {
         assertEquals(u / 5, u * 0.2)
-        assertEquals(5 / u, Vector(listOf(5.0, 2.5, 5 / 3.0, 1.25, 1.0)))
     }
 
     @Test

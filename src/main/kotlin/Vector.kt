@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 class Vector(values: Array<Double>) {
 
-    private val data: ArrayList<Double> = ArrayList(values.asList())
+    private val data = ArrayList(values.asList())
 
     val size: Int
         get() = data.size
@@ -15,7 +15,7 @@ class Vector(values: Array<Double>) {
 
     constructor(length: Int, value: Number = 0.0) : this(Array(length) { value.toDouble() })
 
-    operator fun get(i: Int): Double = data[i]
+    operator fun get(i: Int) = data[i]
 
     operator fun set(i: Int, x: Number) {
         data[i] = x.toDouble()
@@ -26,7 +26,7 @@ class Vector(values: Array<Double>) {
         return Vector(Array(size) { i -> data[i] + v.data[i] })
     }
 
-    operator fun times(s: Number): Vector = Vector(Array(size) { i -> data[i] * s.toDouble() })
+    operator fun times(s: Number) = Vector(Array(size) { i -> data[i] * s.toDouble() })
 
     operator fun times(v: Vector): Double {
         require(size == v.size) { "Vector sizes must be the same." }
@@ -36,43 +36,35 @@ class Vector(values: Array<Double>) {
         return result
     }
 
-    operator fun unaryPlus(): Vector = this.times(1)
+    operator fun unaryPlus() = this.times(1)
 
-    operator fun unaryMinus(): Vector = this.times(-1)
+    operator fun unaryMinus() = this.times(-1)
 
-    operator fun minus(v: Vector): Vector = this.plus(v.unaryMinus())
+    operator fun minus(v: Vector) = this.plus(v.unaryMinus())
 
-    operator fun div(s: Number): Vector = this.times(1.0 / s.toDouble())
+    operator fun div(s: Number) = this.times(1.0 / s.toDouble())
 
     override fun equals(other: Any?): Boolean {
-        if (other is Vector) {
-            if (size != other.size)
+        if (other !is Vector || size != other.size)
+            return false
+        for (i in 0 until size)
+            if (data[i] != other.data[i])
                 return false
-            for (i in 0 until size)
-                if (data[i] != other.data[i])
-                    return false
-            return true
+        return true
+    }
+
+    override fun hashCode() = data.hashCode()
+
+    fun subVector(indexes: SortedSet<Int>): Vector {
+        require(indexes.first() in 0..indexes.last() && indexes.last() < size) {
+            "Sub-vector boundaries are invalid."
         }
-        return super.equals(other)
+        return Vector(Array(indexes.size) { i -> data[indexes.elementAt(i)] })
     }
 
-    override fun hashCode(): Int {
-        return data.hashCode()
-    }
+    fun subVector(indexes: IntRange) = subVector(indexes.toSortedSet())
 
-    fun subVector(cellIndexes: SortedSet<Int>): Vector {
-        require(cellIndexes.first() in 0..cellIndexes.last() && cellIndexes.last() < size) {
-            "Subvector boundaries are invalid."
-        }
-        val result = ArrayList<Double>()
-        for (index in cellIndexes)
-            result.add(data[index])
-        return Vector(result)
-    }
-
-    fun subVector(cells: IntRange): Vector = subVector(cells.toSortedSet())
-
-    fun subVector(fromIndex: Int, toIndex: Int): Vector = subVector(fromIndex..toIndex)
+    fun subVector(fromIndex: Int, toIndex: Int) = subVector(fromIndex..toIndex)
 
     fun swap(index1: Int, index2: Int) {
         val temp = data[index1]
@@ -80,27 +72,20 @@ class Vector(values: Array<Double>) {
         data[index2] = temp
     }
 
-    fun toList(): List<Double> = data.toList()
+    fun toList() = data.toList()
 
-    fun toDoubleArray(): DoubleArray = data.toDoubleArray()
+    fun toDoubleArray() = data.toDoubleArray()
 
-    fun toIntArray(): IntArray = IntArray(size) { i -> data[i].roundToInt() }
+    fun toIntArray() = IntArray(size) { i -> data[i].roundToInt() }
 
-    fun toLongArray(): LongArray = LongArray(size) { i -> data[i].roundToLong() }
+    fun toLongArray() = LongArray(size) { i -> data[i].roundToLong() }
 
-    fun toString(trim: Boolean): String {
+    override fun toString(): String {
         val result = StringBuilder("| ")
-        for (i in 0 until size) {
-            if (trim)
-                result.append(data[i].toString().split('.').first())
-            else
-                result.append(data[i])
-            result.append(' ')
-        }
+        for (i in 0 until size)
+            result.append(data[i]).append(' ')
         return result.append('|').toString()
     }
-
-    override fun toString(): String = this.toString(false)
 
     companion object {
 

@@ -2,7 +2,7 @@ import org.junit.Assert
 
 open class MyTest {
 
-    val delta = 0.00000001
+    val delta = 0.0001
 
     fun assertEquals(expected: Vector, actual: Vector, epsilon: Double = delta) {
         Assert.assertEquals(expected.size, actual.size)

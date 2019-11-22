@@ -21,18 +21,11 @@ open class Matrix(values: Collection<Vector>) {
 
     constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> Vector(values[i]) })
 
-    constructor(
-        values: List<Number>,
-        rows: Int
-    ) : this(Array(rows) { i -> Vector(values.subList(i * values.size / rows, (i + 1) * values.size / rows)) })
+    constructor(values: List<Number>, rows: Int) : this(Array(rows) { i ->
+        Vector(values.subList(i * values.size / rows, (i + 1) * values.size / rows))
+    })
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
-
-    operator fun get(i: Int, j: Int): Double = data[i][j]
-
-    operator fun set(i: Int, j: Int, x: Number) {
-        data[i][j] = x
-    }
 
     fun column(columnIndex: Int): Vector {
         val column = ArrayList<Double>()
@@ -43,7 +36,13 @@ open class Matrix(values: Collection<Vector>) {
 
     fun row(rowIndex: Int): Vector = data[rowIndex]
 
-    open operator fun plus(m: Matrix): Matrix {
+    operator fun get(i: Int, j: Int): Double = data[i][j]
+
+    operator fun set(i: Int, j: Int, x: Number) {
+        data[i][j] = x
+    }
+
+    operator fun plus(m: Matrix): Matrix {
         require(height == m.height && width == m.width) { "Matrices have incompatible sizes for addition." }
         return Matrix(Array(height) { i -> data[i] + m.data[i] })
     }
@@ -65,8 +64,8 @@ open class Matrix(values: Collection<Vector>) {
 
     override fun equals(other: Any?): Boolean {
         if (other is Matrix) {
-           if (height != other.height || width != other.width)
-               return false
+            if (height != other.height || width != other.width)
+                return false
             for (i in 0 until height)
                 if (!data[i].equals(other.data[i]))
                     return false
@@ -115,8 +114,6 @@ open class Matrix(values: Collection<Vector>) {
     }
 
     fun transpose(): Matrix = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
-
-    fun toArray(): Array<Vector> = Array(height) { i -> data[i] }
 
     fun toList(): List<Vector> = data.toList()
 

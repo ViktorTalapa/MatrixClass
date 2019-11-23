@@ -1,7 +1,5 @@
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import kotlin.random.Random
 
 class Vector(values: Array<Double>) {
@@ -15,7 +13,7 @@ class Vector(values: Array<Double>) {
 
     constructor(length: Int, value: Number = 0.0) : this(Array(length) { value.toDouble() })
 
-    operator fun get(i: Int) = data[i]
+    operator fun get(i: Int): Double = data[i]
 
     operator fun set(i: Int, x: Number) {
         data[i] = x.toDouble()
@@ -23,16 +21,16 @@ class Vector(values: Array<Double>) {
 
     operator fun plus(v: Vector): Vector {
         require(size == v.size) { "Vector sizes must be the same." }
-        return Vector(Array(size) { i -> data[i] + v.data[i] })
+        return Vector(Array(size) { i -> this[i] + v[i] })
     }
 
-    operator fun times(s: Number) = Vector(Array(size) { i -> data[i] * s.toDouble() })
+    operator fun times(s: Number) = Vector(Array(size) { i -> this[i] * s.toDouble() })
 
     operator fun times(v: Vector): Double {
         require(size == v.size) { "Vector sizes must be the same." }
         var result = 0.0
         for (i in 0 until size)
-            result += data[i] * v.data[i]
+            result += this[i] * v[i]
         return result
     }
 
@@ -48,12 +46,14 @@ class Vector(values: Array<Double>) {
         if (other !is Vector || size != other.size)
             return false
         for (i in 0 until size)
-            if (data[i] != other.data[i])
+            if (this[i] != other[i])
                 return false
         return true
     }
 
     override fun hashCode() = data.hashCode()
+
+    fun product(): Double = data.reduce { acc, it -> acc * it }
 
     fun subVector(indexes: SortedSet<Int>): Vector {
         require(indexes.first() in 0..indexes.last() && indexes.last() < size) {
@@ -66,24 +66,20 @@ class Vector(values: Array<Double>) {
 
     fun subVector(fromIndex: Int, toIndex: Int) = subVector(fromIndex..toIndex)
 
+    fun sum(): Double = data.sum()
+
     fun swap(index1: Int, index2: Int) {
-        val temp = data[index1]
-        data[index1] = data[index2]
-        data[index2] = temp
+        val temp = this[index1]
+        this[index1] = this[index2]
+        this[index2] = temp
     }
 
     fun toList() = data.toList()
 
-    fun toDoubleArray() = data.toDoubleArray()
-
-    fun toIntArray() = IntArray(size) { i -> data[i].roundToInt() }
-
-    fun toLongArray() = LongArray(size) { i -> data[i].roundToLong() }
-
     override fun toString(): String {
         val result = StringBuilder("| ")
         for (i in 0 until size)
-            result.append(data[i]).append(' ')
+            result.append(this[i]).append(' ')
         return result.append('|').toString()
     }
 

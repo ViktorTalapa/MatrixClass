@@ -3,7 +3,7 @@ import kotlin.collections.ArrayList
 
 open class Matrix(values: Collection<Vector>) {
 
-    protected val data = ArrayList(values)
+    private val data = ArrayList(values)
 
     val height: Int
         get() = data.size
@@ -26,9 +26,7 @@ open class Matrix(values: Collection<Vector>) {
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
 
-    constructor(m: Matrix) : this(m.data)
-
-    operator fun get(i: Int, j: Int) = data[i][j]
+    operator fun get(i: Int, j: Int): Double = data[i][j]
 
     operator fun set(i: Int, j: Int, x: Number) {
         data[i][j] = x
@@ -41,11 +39,11 @@ open class Matrix(values: Collection<Vector>) {
         return Vector(column)
     }
 
-    fun row(rowIndex: Int) = data[rowIndex]
+    fun row(rowIndex: Int): Vector = data[rowIndex]
 
     operator fun plus(m: Matrix): Matrix {
         require(height == m.height && width == m.width) { "Matrices have incompatible sizes for addition." }
-        return Matrix(Array(height) { i -> data[i] + m.data[i] })
+        return Matrix(Array(height) { i -> row(i) + m.row(i) })
     }
 
     operator fun times(m: Matrix): Matrix {
@@ -53,7 +51,7 @@ open class Matrix(values: Collection<Vector>) {
         return Matrix(Array(height) { i -> Vector(Array(m.width) { j -> row(i) * m.column(j) }) })
     }
 
-    open operator fun times(s: Number) = Matrix(Array(height) { i -> data[i] * s.toDouble() })
+    open operator fun times(s: Number) = Matrix(Array(height) { i -> row(i) * s })
 
     open operator fun div(s: Number) = this.times(1 / s.toDouble())
 
@@ -63,12 +61,14 @@ open class Matrix(values: Collection<Vector>) {
 
     operator fun minus(m: Matrix) = this.plus(m.unaryMinus())
 
+    fun clone() = Matrix(Array(height) { i -> Vector(Array(width) { j -> this[i, j] }) })
+
     fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
         require(
             rowIndexes.first() in 0..rowIndexes.last() && rowIndexes.last() < height &&
                     columnIndexes.first() in 0..columnIndexes.last() && columnIndexes.last() < width
         ) { "Submatrix boundaries should be within the matrix." }
-        return Matrix(Array(rowIndexes.size) { i -> data[rowIndexes.elementAt(i)].subVector(columnIndexes) })
+        return Matrix(Array(rowIndexes.size) { i -> row(rowIndexes.elementAt(i)).subVector(columnIndexes) })
     }
 
     fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) =
@@ -90,11 +90,11 @@ open class Matrix(values: Collection<Vector>) {
     }
 
     fun swapRows(rowIndex1: Int, rowIndex2: Int) {
-        for (i in 0 until width)
-            swap(rowIndex1, i, rowIndex2, i)
+        for (j in 0 until width)
+            swap(rowIndex1, j, rowIndex2, j)
     }
 
-    fun toList(): List<Vector> = data.toList()
+    fun toList() = data.toMutableList()
 
     open fun transpose() = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
 
@@ -103,7 +103,7 @@ open class Matrix(values: Collection<Vector>) {
             if (height != other.height || width != other.width)
                 return false
             for (i in 0 until height)
-                if (!data[i].equals(other.data[i]))
+                if (row(i) != other.row(i))
                     return false
             return true
         }
@@ -117,32 +117,5 @@ open class Matrix(values: Collection<Vector>) {
         for (row in data)
             result.append(row.toString()).append(System.lineSeparator())
         return result.toString()
-    }
-
-    companion object {
-
-        fun diagonal(values: Collection<Number>): Matrix {
-            val result = Matrix(values.size, values.size, 0)
-            for (i in values.indices)
-                result[i, i] = values.elementAt(i).toDouble()
-            return result
-        }
-
-        fun identity(order: Int): Matrix {
-            return diagonal(Array(order) { 1 }.asList())
-        }
-
-        fun generate(
-            rows: Int,
-            columns: Int,
-            minValue: Number = Double.MIN_VALUE,
-            maxValue: Number = Double.MAX_VALUE,
-            integers: Boolean = false
-        ): Matrix {
-            val result = ArrayList<Vector>()
-            for (i in 0 until rows)
-                result.add(Vector.generate(columns, minValue, maxValue, integers))
-            return Matrix(result)
-        }
     }
 }

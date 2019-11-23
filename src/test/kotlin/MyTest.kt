@@ -2,15 +2,15 @@ import org.junit.Assert
 
 open class MyTest {
 
-    val delta = 0.0001
+    val epsilon = 1e-10
 
-    fun assertEquals(expected: Vector, actual: Vector, epsilon: Double = delta) {
+    fun assertEquals(expected: Vector, actual: Vector, epsilon: Double = this.epsilon) {
         Assert.assertEquals(expected.size, actual.size)
         for(i in 0 until expected.size)
             Assert.assertEquals(expected[i], actual[i], epsilon)
     }
 
-    fun assertEquals(expected: Matrix, actual: Matrix, epsilon: Double = delta) {
+    fun assertEquals(expected: Matrix, actual: Matrix, epsilon: Double = this.epsilon) {
         Assert.assertEquals(expected.height, actual.height)
         Assert.assertEquals(expected.width, actual.width)
         for(i in 0 until expected.height)

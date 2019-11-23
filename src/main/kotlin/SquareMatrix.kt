@@ -12,7 +12,7 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
         Vector(values.subList(i * values.size / rows, (i + 1) * values.size / rows))
     })
 
-    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
+    constructor(order: Int, value: Number = 0.0) : this(Array(order) { Vector(order, value) })
 
     constructor(m: Matrix) : this(m.toList())
 
@@ -30,23 +30,19 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     override operator fun unaryMinus() = this.times(-1)
 
+    fun diagonalValues() = Vector(Array(height) { i -> this[i, i] })
+
     fun determinant(): Double {
         if (height == 1)
-            return data[0][0]
-        var result = 0.0
-        for (i in 0 until height) {
-            val sign = if (i % 2 == 0) 1 else -1
-            //result += sign * data[0][i] * SquareMatrix(subMatrix()).determinant()
-        }
-        return result
+            return this[0, 0]
+        if (height == 2)
+            return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
+        val copy = SquareMatrix(this.clone())
+        val sign = Matrices.formRowEchelon(copy)
+        return sign * copy.diagonalValues().product()
     }
 
-    fun trace(): Double {
-        var result = 0.0
-        for (i in 0 until height)
-            result += data[i][i]
-        return result
-    }
+    fun trace() = diagonalValues().sum()
 
     override fun transpose() = SquareMatrix(super.transpose())
 }

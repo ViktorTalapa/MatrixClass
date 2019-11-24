@@ -21,13 +21,12 @@ class MatrixTest : MyTest() {
 
     @Test
     fun index() {
-        assertEquals(8.0, B[2, 1], epsilon)
+        assertEquals(8, B[2, 1])
         assertEquals(Vector(listOf(4, 5, 6)), B.row(1))
         assertEquals(Vector(listOf(9.1, 6.1, 3.7)), A.column(2))
         B[0, 2] = 15
-        A[1, 0] = B[2, 1]
-        assertEquals(A[1, 0], 8.0, epsilon)
-        assertEquals(B[0, 2], 15.0, epsilon)
+        A[1, 0] = B[0, 2]
+        assertEquals(15, A[1, 0])
     }
 
     @Test
@@ -74,6 +73,13 @@ class MatrixTest : MyTest() {
     }
 
     @Test
+    fun swap() {
+        A.swapRows(0, 2)
+        A.swapColumns(1, 2)
+        assertEquals(Matrix(listOf(1.22, 3.7, 2.56, 9.2, 4.1, 6.1, 5.0, 3.5, 7.5, 9.1, 8.3, 8.0), 3), A)
+    }
+
+    @Test
     fun transpose() {
         val T = Matrix(
             listOf(7.5, 4.1, 1.22),
@@ -103,10 +109,10 @@ class MatrixTest : MyTest() {
         assertEquals(1.0, Matrices.identity(5).determinant(), epsilon)
     }
 
-    @Test
+   @Test
     fun trace() {
-        assertEquals(B.trace(), 15.0, epsilon)
-        assertEquals(C.trace(), C.transpose().trace(), epsilon)
-        assertEquals((B * C).trace(), (C * B).trace(), epsilon)
+        assertEquals(B.trace(), 15.0)
+        assertEquals(C.trace(), C.transpose().trace())
+        assertEquals((B * C).trace(), (C * B).trace())
     }
 }

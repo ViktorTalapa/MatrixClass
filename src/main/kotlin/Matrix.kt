@@ -20,20 +20,20 @@ open class Matrix(values: Collection<Vector>) {
 
     constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> Vector(values[i]) })
 
-    constructor(values: List<Number>, rows: Int) : this(Array(rows) { i ->
-        Vector(values.subList(i * values.size / rows, (i + 1) * values.size / rows))
+    constructor(values: Collection<Number>, rows: Int) : this(Array(rows) { i ->
+        Vector(values.toList().subList(i * values.size / rows, (i + 1) * values.size / rows))
     })
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
 
-    operator fun get(i: Int, j: Int): Double = data[i][j]
+    operator fun get(i: Int, j: Int): Number = data[i][j]
 
     operator fun set(i: Int, j: Int, x: Number) {
         data[i][j] = x
     }
 
     fun column(columnIndex: Int): Vector {
-        val column = ArrayList<Double>()
+        val column = ArrayList<Number>()
         for (row in data)
             column.add(row[columnIndex])
         return Vector(column)
@@ -61,7 +61,7 @@ open class Matrix(values: Collection<Vector>) {
 
     operator fun minus(m: Matrix) = this.plus(m.unaryMinus())
 
-    fun clone() = Matrix(Array(height) { i -> Vector(Array(width) { j -> this[i, j] }) })
+    open fun clone() = Matrix(Array(height) { i -> data[i].clone() })
 
     fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
         require(
@@ -94,7 +94,7 @@ open class Matrix(values: Collection<Vector>) {
             swap(rowIndex1, j, rowIndex2, j)
     }
 
-    fun toList() = data.toMutableList()
+    fun toList() = data.toList()
 
     open fun transpose() = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
 

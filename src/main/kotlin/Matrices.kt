@@ -15,16 +15,16 @@ object Matrices {
         for (p in 0 until min(a.height, a.width)) {
             var max = p
             for (i in p + 1 until a.height)
-                if (abs(a[i, p]) > abs(a[max, p]))
+                if (abs(a[i, p].toDouble()) > abs(a[max, p].toDouble()))
                     max = i
             if (max != p) {
                 a.swapRows(p, max)
                 sign = -sign
             }
-            if (abs(a[p, p]) <= epsilon)
+            if (abs(a[p, p].toDouble()) <= epsilon)
                 return 0
             for (i in p + 1 until a.height) {
-                val factor = a[i, p] / a[p, p]
+                val factor = a[i, p] / a[p, p].toDouble()
                 for (j in p until a.height)
                     a[i, j] -= a[p, j] * factor
             }

@@ -2,36 +2,33 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.random.Random
 
-class Vector(values: Array<Double>) {
+class Vector(values: Collection<Number>) {
 
-    private val data = ArrayList(values.asList())
+    private val data = ArrayList(values)
 
     val size: Int
         get() = data.size
 
-    constructor(values: Collection<Number>) : this(Array(values.size) { i -> values.elementAt(i).toDouble() })
+    constructor(values: Array<Number>) : this(values.asList())
 
-    constructor(length: Int, value: Number = 0.0) : this(Array(length) { value.toDouble() })
+    constructor(length: Int, value: Number = 0.0) : this(Array(length) { value })
 
-    operator fun get(i: Int): Double = data[i]
+    operator fun get(i: Int): Number = data[i]
 
     operator fun set(i: Int, x: Number) {
-        data[i] = x.toDouble()
+        data[i] = x
     }
 
     operator fun plus(v: Vector): Vector {
-        require(size == v.size) { "Vector sizes must be the same." }
+        require(size == v.size) { "Vector sizes must be equal." }
         return Vector(Array(size) { i -> this[i] + v[i] })
     }
 
-    operator fun times(s: Number) = Vector(Array(size) { i -> this[i] * s.toDouble() })
+    operator fun times(s: Number) = Vector(Array(size) { i -> this[i] * s })
 
-    operator fun times(v: Vector): Double {
-        require(size == v.size) { "Vector sizes must be the same." }
-        var result = 0.0
-        for (i in 0 until size)
-            result += this[i] * v[i]
-        return result
+    operator fun times(v: Vector): Number {
+        require(size == v.size) { "Vector sizes must be equal." }
+        return Array(size) { i -> this[i] * v[i] }.reduce { acc, it -> acc + it }
     }
 
     operator fun unaryPlus() = this.times(1)
@@ -41,6 +38,8 @@ class Vector(values: Array<Double>) {
     operator fun minus(v: Vector) = this.plus(v.unaryMinus())
 
     operator fun div(s: Number) = this.times(1.0 / s.toDouble())
+
+    fun clone(): Vector = Vector(Array(size) {i -> this[i] })
 
     override fun equals(other: Any?): Boolean {
         if (other !is Vector || size != other.size)
@@ -53,20 +52,20 @@ class Vector(values: Array<Double>) {
 
     override fun hashCode() = data.hashCode()
 
-    fun product(): Double = data.reduce { acc, it -> acc * it }
+    fun product(): Number = data.reduce { acc, it -> acc * it }
 
     fun subVector(indexes: SortedSet<Int>): Vector {
         require(indexes.first() in 0..indexes.last() && indexes.last() < size) {
             "Sub-vector boundaries are invalid."
         }
-        return Vector(Array(indexes.size) { i -> data[indexes.elementAt(i)] })
+        return Vector(Array(indexes.size) { i -> data[indexes.elementAt(i)] }.asList())
     }
 
     fun subVector(indexes: IntRange) = subVector(indexes.toSortedSet())
 
     fun subVector(fromIndex: Int, toIndex: Int) = subVector(fromIndex..toIndex)
 
-    fun sum(): Double = data.sum()
+    fun sum(): Number = data.reduce { acc, it -> acc + it }
 
     fun swap(index1: Int, index2: Int) {
         val temp = this[index1]

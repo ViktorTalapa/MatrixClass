@@ -30,16 +30,18 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     override operator fun unaryMinus() = this.times(-1)
 
+    override fun clone() = SquareMatrix(super.clone())
+
     fun diagonalValues() = Vector(Array(height) { i -> this[i, i] })
 
     fun determinant(): Double {
         if (height == 1)
-            return this[0, 0]
+            return this[0, 0].toDouble()
         if (height == 2)
-            return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
-        val copy = SquareMatrix(this.clone())
+            return (this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]).toDouble()
+        val copy = this.clone()
         val sign = Matrices.formRowEchelon(copy)
-        return sign * copy.diagonalValues().product()
+        return sign * copy.diagonalValues().product().toDouble()
     }
 
     fun trace() = diagonalValues().sum()

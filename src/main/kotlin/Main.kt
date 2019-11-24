@@ -11,10 +11,5 @@ object Main {
         println("Here is a 4x4 Matrix of 3:")
         val a = Matrix(4, 4, 3)
         print(a.toString())
-        println("Row echelon form of the last matrix:")
-        Matrices.formRowEchelon(a)
-        println(a.toString())
-
-
     }
 }

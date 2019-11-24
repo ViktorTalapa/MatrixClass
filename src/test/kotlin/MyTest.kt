@@ -7,7 +7,7 @@ open class MyTest {
     fun assertEquals(expected: Vector, actual: Vector, epsilon: Double = this.epsilon) {
         Assert.assertEquals(expected.size, actual.size)
         for(i in 0 until expected.size)
-            Assert.assertEquals(expected[i], actual[i], epsilon)
+            Assert.assertEquals(expected[i].toDouble(), actual[i].toDouble(), epsilon)
     }
 
     fun assertEquals(expected: Matrix, actual: Matrix, epsilon: Double = this.epsilon) {

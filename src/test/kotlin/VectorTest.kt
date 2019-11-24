@@ -8,24 +8,23 @@ class VectorTest : MyTest() {
 
     @Test
     fun index() {
-        assertEquals(4.0, u[3], epsilon)
+        assertEquals(4, u[3])
         u[3] = 22
         v[2] = u[3]
-        assertEquals(22.0, u[3], epsilon)
-        assertEquals(22.0, v[2], epsilon)
+        assertEquals(22, v[2])
     }
 
     @Test
     fun plus() {
-        assertEquals(Vector(listOf(6.0, 7.8, 9.1, 9.87, 7.3)), u + v, epsilon)
-        assertEquals(u + v, v + u, epsilon)
+        assertEquals(Vector(listOf(6.0, 7.8, 9.1, 9.87, 7.3)), u + v)
+        assertEquals(u + v, v + u)
     }
 
     @Test
     fun times() {
         assertEquals(Vector(listOf(25.0, 29.0, 30.5, 29.35, 11.5)), v * 5.0)
         assertEquals(v * 5.0, 5 * v)
-        assertEquals(69.88, u * v, epsilon)
+        assertEquals(69.88, u * v)
     }
 
     @Test

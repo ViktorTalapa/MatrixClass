@@ -4,7 +4,7 @@ import kotlin.math.min
 object Matrices {
 
     /**
-     * Transforms the given matrix to row echelon format. Can be used for Gaussian elimination or determinant calculation.
+     * Transforms the given matrix to row echelon format.
      * @param a:        The input Matrix
      * @param epsilon:  Precision of double value comparison to 0 (default value is 1e-10)
      *

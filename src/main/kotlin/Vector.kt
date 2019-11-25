@@ -2,13 +2,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.random.Random
 
-/**
- * Class representing an N vector.
- *
- * @property data      ArrayList containing the vector values.
- * @property size   Number of elements in the vector.
- * @constructor     Takes any kind of collection of Numbers to construct the Vector object.
- */
 class Vector(values: Collection<Number>) {
 
     private val data = ArrayList(values)

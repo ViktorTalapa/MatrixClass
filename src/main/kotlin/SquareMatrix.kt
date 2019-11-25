@@ -16,6 +16,8 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     constructor(m: Matrix) : this(m.toList())
 
+    override fun clone() = SquareMatrix(super.clone())
+
     operator fun plus(m: SquareMatrix) = SquareMatrix(super.plus(m))
 
     operator fun minus(m: SquareMatrix) = SquareMatrix(super.minus(m))
@@ -30,7 +32,7 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     override operator fun unaryMinus() = this.times(-1)
 
-    override fun clone() = SquareMatrix(super.clone())
+    override fun transpose() = SquareMatrix(super.transpose())
 
     fun diagonalValues() = Vector(Array(height) { i -> this[i, i] })
 
@@ -45,6 +47,4 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
     }
 
     fun trace() = diagonalValues().sum()
-
-    override fun transpose() = SquareMatrix(super.transpose())
 }

@@ -2,6 +2,13 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.random.Random
 
+/**
+ * Class representing an N vector.
+ *
+ * @property data      ArrayList containing the vector values.
+ * @property size   Number of elements in the vector.
+ * @constructor     Takes any kind of collection of Numbers to construct the Vector object.
+ */
 class Vector(values: Collection<Number>) {
 
     private val data = ArrayList(values)
@@ -12,6 +19,8 @@ class Vector(values: Collection<Number>) {
     constructor(values: Array<Number>) : this(values.asList())
 
     constructor(length: Int, value: Number = 0.0) : this(Array(length) { value })
+
+    fun clone(): Vector = Vector(Array(size) {i -> this[i] })
 
     operator fun get(i: Int): Number = data[i]
 
@@ -37,9 +46,28 @@ class Vector(values: Collection<Number>) {
 
     operator fun minus(v: Vector) = this.plus(v.unaryMinus())
 
-    operator fun div(s: Number) = this.times(1.0 / s.toDouble())
+    operator fun div(s: Number) = this.times(1 / s)
 
-    fun clone(): Vector = Vector(Array(size) {i -> this[i] })
+    fun product(): Number = data.reduce { acc, it -> acc * it }
+
+    fun sum(): Number = data.reduce { acc, it -> acc + it }
+
+    fun subVector(indexes: SortedSet<Int>): Vector {
+        require(indexes.first() in 0..indexes.last() && indexes.last() < size) {
+            "Sub-vector boundaries are invalid."
+        }
+        return Vector(Array(indexes.size) { i -> data[indexes.elementAt(i)] })
+    }
+
+    fun subVector(indexes: IntRange) = subVector(indexes.toSortedSet())
+
+    fun subVector(fromIndex: Int, toIndex: Int) = subVector(fromIndex..toIndex)
+
+    fun swap(index1: Int, index2: Int) {
+        val temp = this[index1]
+        this[index1] = this[index2]
+        this[index2] = temp
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is Vector || size != other.size)
@@ -52,35 +80,14 @@ class Vector(values: Collection<Number>) {
 
     override fun hashCode() = data.hashCode()
 
-    fun product(): Number = data.reduce { acc, it -> acc * it }
-
-    fun subVector(indexes: SortedSet<Int>): Vector {
-        require(indexes.first() in 0..indexes.last() && indexes.last() < size) {
-            "Sub-vector boundaries are invalid."
-        }
-        return Vector(Array(indexes.size) { i -> data[indexes.elementAt(i)] }.asList())
-    }
-
-    fun subVector(indexes: IntRange) = subVector(indexes.toSortedSet())
-
-    fun subVector(fromIndex: Int, toIndex: Int) = subVector(fromIndex..toIndex)
-
-    fun sum(): Number = data.reduce { acc, it -> acc + it }
-
-    fun swap(index1: Int, index2: Int) {
-        val temp = this[index1]
-        this[index1] = this[index2]
-        this[index2] = temp
-    }
-
-    fun toList() = data.toList()
-
     override fun toString(): String {
         val result = StringBuilder("| ")
         for (i in 0 until size)
             result.append(this[i]).append(' ')
         return result.append('|').toString()
     }
+
+    fun toList() = data.toList()
 
     companion object {
 
@@ -91,11 +98,12 @@ class Vector(values: Collection<Number>) {
             integers: Boolean = false
         ): Vector {
             val result = ArrayList<Number>()
-            for (i in 0 until size)
+            for (i in 0 until size) {
                 if (integers)
                     result.add(Random.nextInt(minValue.toInt(), maxValue.toInt()))
                 else
                     result.add(Random.nextDouble(minValue.toDouble(), maxValue.toDouble()))
+            }
             return Vector(result)
         }
     }

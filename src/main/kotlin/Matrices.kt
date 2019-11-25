@@ -3,13 +3,14 @@ import kotlin.math.min
 
 object Matrices {
 
-    fun diagonal(values: Collection<Number>): SquareMatrix {
-        val result = SquareMatrix(values.size, 0)
-        for (i in values.indices)
-            result[i, i] = values.elementAt(i)
-        return result
-    }
-
+    /**
+     * Transforms the given matrix to row echelon format. Can be used for Gaussian elimination or determinant calculation.
+     * @param a:        The input Matrix
+     * @param epsilon:  Precision of double value comparison to 0 (default value is 1e-10)
+     *
+     * @return 0 if the matrix is singular (and therefore the determinant is 0) and 1 or -1 representing the change
+     * of the sign of the determinant.
+     */
     fun formRowEchelon(a: Matrix, epsilon: Double = 1e-10): Int {
         var sign = 1
         for (p in 0 until min(a.height, a.width)) {
@@ -25,11 +26,18 @@ object Matrices {
                 return 0
             for (i in p + 1 until a.height) {
                 val factor = a[i, p] / a[p, p].toDouble()
-                for (j in p until a.height)
+                for (j in p until a.width)
                     a[i, j] -= a[p, j] * factor
             }
         }
         return sign
+    }
+
+    fun diagonal(values: Collection<Number>): SquareMatrix {
+        val result = SquareMatrix(values.size, 0)
+        for (i in values.indices)
+            result[i, i] = values.elementAt(i)
+        return result
     }
 
     fun identity(order: Int): SquareMatrix {

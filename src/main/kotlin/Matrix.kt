@@ -26,11 +26,7 @@ open class Matrix(values: Collection<Vector>) {
 
     constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
 
-    operator fun get(i: Int, j: Int): Number = data[i][j]
-
-    operator fun set(i: Int, j: Int, x: Number) {
-        data[i][j] = x
-    }
+    open fun clone() = Matrix(Array(height) { i -> data[i].clone() })
 
     fun column(columnIndex: Int): Vector {
         val column = ArrayList<Number>()
@@ -41,27 +37,33 @@ open class Matrix(values: Collection<Vector>) {
 
     fun row(rowIndex: Int): Vector = data[rowIndex]
 
-    operator fun plus(m: Matrix): Matrix {
+    operator fun get(i: Int, j: Int) = data[i][j]
+
+    operator fun set(i: Int, j: Int, x: Number) {
+        data[i][j] = x
+    }
+
+    open operator fun plus(m: Matrix): Matrix {
         require(height == m.height && width == m.width) { "Matrices have incompatible sizes for addition." }
         return Matrix(Array(height) { i -> row(i) + m.row(i) })
     }
 
-    operator fun times(m: Matrix): Matrix {
+    open operator fun times(m: Matrix): Matrix {
         require(width == m.height) { "Matrices have incompatible sizes for multiplication." }
         return Matrix(Array(height) { i -> Vector(Array(m.width) { j -> row(i) * m.column(j) }) })
     }
 
     open operator fun times(s: Number) = Matrix(Array(height) { i -> row(i) * s })
 
-    open operator fun div(s: Number) = this.times(1 / s.toDouble())
-
     open operator fun unaryPlus() = this.times(1)
 
     open operator fun unaryMinus() = this.times(-1)
 
-    operator fun minus(m: Matrix) = this.plus(m.unaryMinus())
+    open operator fun minus(m: Matrix) = this.plus(m.unaryMinus())
 
-    open fun clone() = Matrix(Array(height) { i -> data[i].clone() })
+    open operator fun div(s: Number) = this.times(1 / s)
+
+    open fun transpose() = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
 
     fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
         require(
@@ -74,8 +76,8 @@ open class Matrix(values: Collection<Vector>) {
     fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) =
         subMatrix(rowIndexes.toSortedSet(), columnIndexes.toSortedSet())
 
-    fun subMatrix(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) =
-        subMatrix(rowIndex1..rowIndex2, columnIndex1..columnIndex2)
+    fun subMatrix(fromRowIndex: Int, fromColumnIndex: Int, toRowIndex: Int, toColumnIndex: Int) =
+        subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
 
 
     fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
@@ -93,10 +95,6 @@ open class Matrix(values: Collection<Vector>) {
         for (j in 0 until width)
             swap(rowIndex1, j, rowIndex2, j)
     }
-
-    fun toList() = data.toList()
-
-    open fun transpose() = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
 
     override fun equals(other: Any?): Boolean {
         if (other is Matrix) {
@@ -118,4 +116,6 @@ open class Matrix(values: Collection<Vector>) {
             result.append(row.toString()).append(System.lineSeparator())
         return result.toString()
     }
+
+    fun toList() = data.toList()
 }

@@ -5,9 +5,9 @@ class MatrixTest : MyTest() {
 
     private val A = Matrix(
         listOf(
-            Vector(listOf(7.5, 8.3, 9.1, 8.0)),
-            Vector(listOf(4.1, 5.0, 6.1, 3.5)),
-            Vector(listOf(1.22, 2.56, 3.7, 9.2))
+            MathVector(7.5, 8.3, 9.1, 8.0),
+            MathVector(4.1, 5.0, 6.1, 3.5),
+            MathVector(1.22, 2.56, 3.7, 9.2)
         )
     )
 
@@ -21,12 +21,12 @@ class MatrixTest : MyTest() {
 
     @Test
     fun index() {
-        assertEquals(8, B[2, 1])
-        assertEquals(Vector(listOf(4, 5, 6)), B.row(1))
-        assertEquals(Vector(listOf(9.1, 6.1, 3.7)), A.column(2))
+        assertEquals(8.0, B[2, 1], epsilon)
+        assertEquals(MathVector(4, 5, 6), B.row(1))
+        assertEquals(MathVector(listOf(9.1, 6.1, 3.7)), A.column(2))
         B[0, 2] = 15
         A[1, 0] = B[0, 2]
-        assertEquals(15, A[1, 0])
+        assertEquals(15.0, A[1, 0], epsilon)
     }
 
     @Test
@@ -111,8 +111,8 @@ class MatrixTest : MyTest() {
 
    @Test
     fun trace() {
-        assertEquals(B.trace(), 15.0)
-        assertEquals(C.trace(), C.transpose().trace())
-        assertEquals((B * C).trace(), (C * B).trace())
+        assertEquals(15.0, B.trace(), epsilon)
+        assertEquals(C.trace(), C.transpose().trace(), epsilon)
+        assertEquals((B * C).trace(), (C * B).trace(), epsilon)
     }
 }

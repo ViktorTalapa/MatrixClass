@@ -1,22 +1,20 @@
-class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
+class SquareMatrix(values: Collection<MathVector>) : Matrix(values) {
 
     init {
         require(height == width) { "Square Matrix rows and columns must be in equal sizes." }
     }
 
-    constructor(values: Array<Vector>) : this(values.asList())
+    constructor(values: Array<MathVector>) : this(values.asList())
 
-    constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> Vector(values[i]) })
+    constructor(matrix: Matrix) : this(Array(matrix.height) { i -> matrix.row(i) })
 
-    constructor(values: List<Number>, rows: Int) : this(Array(rows) { i ->
-        Vector(values.subList(i * values.size / rows, (i + 1) * values.size / rows))
-    })
+    constructor(values: Array<DoubleArray>) : this(Matrix(values))
 
-    constructor(order: Int, value: Number = 0.0) : this(Array(order) { Vector(order, value) })
+    constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> MathVector(values[i]) })
 
-    constructor(m: Matrix) : this(m.toList())
+    constructor(values: List<Number>, rows: Int) : this(Matrix(values, rows))
 
-    override fun clone() = SquareMatrix(super.clone())
+    constructor(order: Int, value: Number = 0.0) : this(Matrix(order, order, value))
 
     operator fun plus(m: SquareMatrix) = SquareMatrix(super.plus(m))
 
@@ -24,9 +22,9 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     operator fun times(m: SquareMatrix) = SquareMatrix(super.times(m))
 
-    override operator fun times(s: Number) = SquareMatrix(super.times(s))
+    override operator fun times(scalar: Number) = SquareMatrix(super.times(scalar))
 
-    override operator fun div(s: Number) = SquareMatrix(super.times(s))
+    override operator fun div(scalar: Number) = SquareMatrix(super.times(scalar))
 
     override operator fun unaryPlus() = this.times(1)
 
@@ -34,16 +32,18 @@ class SquareMatrix(values: Collection<Vector>) : Matrix(values) {
 
     override fun transpose() = SquareMatrix(super.transpose())
 
-    fun diagonalValues() = Vector(Array(height) { i -> this[i, i] })
+    override fun copy() = SquareMatrix(super.copy())
+
+    fun diagonalValues() = MathVector(DoubleArray(height) { i -> this[i, i] })
 
     fun determinant(): Double {
         if (height == 1)
-            return this[0, 0].toDouble()
+            return this[0, 0]
         if (height == 2)
-            return (this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]).toDouble()
-        val copy = this.clone()
+            return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
+        val copy = this.copy()
         val sign = Matrices.formRowEchelon(copy)
-        return sign * copy.diagonalValues().product().toDouble()
+        return sign * copy.diagonalValues().product()
     }
 
     fun trace() = diagonalValues().sum()

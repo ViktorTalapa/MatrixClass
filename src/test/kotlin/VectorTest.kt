@@ -3,28 +3,28 @@ import org.junit.Test
 
 class VectorTest : MyTest() {
 
-    private val u = Vector(arrayOf(1, 2, 3, 4, 5).asList())
-    private val v = Vector(listOf(5.0, 5.8, 6.1, 5.87, 2.3))
+    private val u = MathVector(listOf(1, 2, 3, 4, 5))
+    private val v = MathVector(doubleArrayOf(5.0, 5.8, 6.1, 5.87, 2.3))
 
     @Test
     fun index() {
-        assertEquals(4, u[3])
+        assertEquals(4.0, u[3], epsilon)
         u[3] = 22
         v[2] = u[3]
-        assertEquals(22, v[2])
+        assertEquals(22.0, v[2], epsilon)
     }
 
     @Test
     fun plus() {
-        assertEquals(Vector(listOf(6.0, 7.8, 9.1, 9.87, 7.3)), u + v)
+        assertEquals(MathVector(listOf(6.0, 7.8, 9.1, 9.87, 7.3)), u + v)
         assertEquals(u + v, v + u)
     }
 
     @Test
     fun times() {
-        assertEquals(Vector(listOf(25.0, 29.0, 30.5, 29.35, 11.5)), v * 5.0)
+        assertEquals(MathVector(listOf(25.0, 29.0, 30.5, 29.35, 11.5)), v * 5.0)
         assertEquals(v * 5.0, 5 * v)
-        assertEquals(69.88, u * v)
+        assertEquals(69.88, u * v, epsilon)
     }
 
     @Test
@@ -35,20 +35,20 @@ class VectorTest : MyTest() {
     @Test
     fun unary() {
         assertEquals(u, +u)
-        assertEquals(Vector(listOf(-1.0, -2.0, -3.0, -4.0, -5.0)), -u)
+        assertEquals(MathVector(listOf(-1.0, -2.0, -3.0, -4.0, -5.0)), -u)
         assertEquals(u - v, -v + u)
     }
 
     @Test
     fun subVector() {
-        assertEquals(Vector(listOf(3.0, 4.0, 5.0)), u.subVector(2, 4))
-        assertEquals(Vector(listOf(2.0, 3.0, 4.0)), u.subVector(1..3))
-        assertEquals(Vector(listOf(1.0, 4.0, 5.0)), u.subVector(sortedSetOf(0, 4, 3)))
+        assertEquals(MathVector(listOf(3.0, 4.0, 5.0)), u.subVector(2, 4))
+        assertEquals(MathVector(listOf(2.0, 3.0, 4.0)), u.subVector(1..3))
+        assertEquals(MathVector(listOf(1.0, 4.0, 5.0)), u.subVector(sortedSetOf(0, 4, 3)))
     }
 
     @Test
     fun swap() {
         u.swap(0, 4)
-        assertEquals(Vector(listOf(5.0, 2.0, 3.0, 4.0, 1.0)), u)
+        assertEquals(MathVector(listOf(5.0, 2.0, 3.0, 4.0, 1.0)), u)
     }
 }

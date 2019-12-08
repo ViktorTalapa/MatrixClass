@@ -16,16 +16,16 @@ object Matrices {
         for (p in 0 until min(a.height, a.width)) {
             var max = p
             for (i in p + 1 until a.height)
-                if (abs(a[i, p].toDouble()) > abs(a[max, p].toDouble()))
+                if (abs(a[i, p]) > abs(a[max, p]))
                     max = i
             if (max != p) {
                 a.swapRows(p, max)
                 sign = -sign
             }
-            if (abs(a[p, p].toDouble()) <= epsilon)
+            if (abs(a[p, p]) <= epsilon)
                 return 0
             for (i in p + 1 until a.height) {
-                val factor = a[i, p] / a[p, p].toDouble()
+                val factor = a[i, p] / a[p, p]
                 for (j in p until a.width)
                     a[i, j] -= a[p, j] * factor
             }
@@ -44,18 +44,9 @@ object Matrices {
         return diagonal(Array(order) { 1 }.asList())
     }
 
-    fun random(
-        rows: Int,
-        columns: Int,
-        minValue: Number = Double.MIN_VALUE,
-        maxValue: Number = Double.MAX_VALUE,
-        integers: Boolean = false
-    ) = Matrix(Array(rows) { i -> Vector.generate(columns, minValue, maxValue, integers) })
+    fun random(rows: Int, columns: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
+        Matrix(Array(rows) { i -> MathVector.random(columns, minValue, maxValue) })
 
-    fun randomSquare(
-        order: Int,
-        minValue: Number = Double.MIN_VALUE,
-        maxValue: Number = Double.MAX_VALUE,
-        integers: Boolean = false
-    ) = SquareMatrix(random(order, order, minValue, maxValue, integers))
+    fun randomSquare(order: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
+        SquareMatrix(random(order, order, minValue, maxValue))
 }

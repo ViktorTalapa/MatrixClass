@@ -3,7 +3,7 @@ object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         println("Here is a 5 Vector:")
-        println(Vector.generate(5).toString())
+        println(MathVector.random(5).toString())
         println("Here is a 5x5 Identity Matrix:")
         println(Matrices.identity(5).toString())
         println("Here is a 5x5 Random Matrix:")

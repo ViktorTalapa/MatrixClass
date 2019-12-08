@@ -1,9 +1,6 @@
-import java.util.*
 import kotlin.collections.ArrayList
 
-open class Matrix(values: Collection<Vector>) {
-
-    private val data = ArrayList(values)
+open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Collection<Double> {
 
     val height: Int
         get() = data.size
@@ -11,70 +8,65 @@ open class Matrix(values: Collection<Vector>) {
     val width: Int
         get() = if (data.isEmpty()) 0 else data.first().size
 
+    override val size: Int
+        get() = height * width
+
     init {
         for (row in data)
             require(width == row.size) { "Matrix rows must be in equal sizes." }
     }
 
-    constructor(values: Array<Vector>) : this(values.asList())
+    constructor(values: Collection<MathVector>) : this(ArrayList(values))
 
-    constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> Vector(values[i]) })
+    constructor(values: Array<MathVector>) : this(values.asList())
 
-    constructor(values: Collection<Number>, rows: Int) : this(Array(rows) { i ->
-        Vector(values.toList().subList(i * values.size / rows, (i + 1) * values.size / rows))
+    constructor(values: Array<DoubleArray>) : this(Array(values.size) { i -> MathVector(values[i]) })
+
+    constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> MathVector(values[i]) })
+
+    constructor(values: List<Number>, rows: Int) : this(Array(rows) { i ->
+        MathVector(values.subList(i * values.size / rows, (i + 1) * values.size / rows))
     })
 
-    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { Vector(columns, value) })
+    constructor(values: DoubleArray, rows: Int) : this(values.asList(), rows)
 
-    open fun clone() = Matrix(Array(height) { i -> data[i].clone() })
+    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { MathVector(columns, value) })
 
-    fun column(columnIndex: Int): Vector {
-        val column = ArrayList<Number>()
-        for (row in data)
-            column.add(row[columnIndex])
-        return Vector(column)
+    fun column(columnIndex: Int) = MathVector(DoubleArray(height) { i -> this[i, columnIndex] })
+
+    fun row(rowIndex: Int): MathVector = data[rowIndex]
+
+    operator fun get(rowIndex: Int, columnIndex: Int) = data[rowIndex][columnIndex]
+
+    operator fun set(rowIndex: Int, columnIndex: Int, element: Number) {
+        data[rowIndex][columnIndex] = element
     }
 
-    fun row(rowIndex: Int): Vector = data[rowIndex]
+    open operator fun plus(other: Matrix) = Matrix(Array(height) { i -> row(i) + other.row(i) })
 
-    operator fun get(i: Int, j: Int) = data[i][j]
+    open operator fun times(scalar: Number) = Matrix(Array(height) { i -> row(i) * scalar })
 
-    operator fun set(i: Int, j: Int, x: Number) {
-        data[i][j] = x
+    open operator fun times(other: Matrix): Matrix {
+        require(width == other.height) { "Matrices have incompatible sizes for multiplication." }
+        return Matrix(Array(height) { i -> DoubleArray(other.width) { j -> row(i) * other.column(j) } })
     }
-
-    open operator fun plus(m: Matrix): Matrix {
-        require(height == m.height && width == m.width) { "Matrices have incompatible sizes for addition." }
-        return Matrix(Array(height) { i -> row(i) + m.row(i) })
-    }
-
-    open operator fun times(m: Matrix): Matrix {
-        require(width == m.height) { "Matrices have incompatible sizes for multiplication." }
-        return Matrix(Array(height) { i -> Vector(Array(m.width) { j -> row(i) * m.column(j) }) })
-    }
-
-    open operator fun times(s: Number) = Matrix(Array(height) { i -> row(i) * s })
 
     open operator fun unaryPlus() = this.times(1)
 
     open operator fun unaryMinus() = this.times(-1)
 
-    open operator fun minus(m: Matrix) = this.plus(m.unaryMinus())
+    open operator fun minus(other: Matrix) = this.plus(other.unaryMinus())
 
-    open operator fun div(s: Number) = this.times(1 / s)
+    open operator fun div(scalar: Number) = this.times(1 / scalar.toDouble())
 
-    open fun transpose() = Matrix(Array(width) { i -> Vector(Array(height) { j -> data[j][i] }) })
+    open fun copy() = Matrix(Array(height) { i -> data[i].copy() })
 
-    fun subMatrix(rowIndexes: SortedSet<Int>, columnIndexes: SortedSet<Int>): Matrix {
-        require(
-            rowIndexes.first() in 0..rowIndexes.last() && rowIndexes.last() < height &&
-                    columnIndexes.first() in 0..columnIndexes.last() && columnIndexes.last() < width
-        ) { "Submatrix boundaries should be within the matrix." }
-        return Matrix(Array(rowIndexes.size) { i -> row(rowIndexes.elementAt(i)).subVector(columnIndexes) })
-    }
+    open fun transpose() = Matrix(Array(width) { i -> DoubleArray(height) { j -> data[j][i] } })
 
-    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) =
-        subMatrix(rowIndexes.toSortedSet(), columnIndexes.toSortedSet())
+    fun subMatrix(rowIndexes: Set<Int>, columnIndexes: Set<Int>) =
+        Matrix(Array(rowIndexes.size) { i -> this.row(rowIndexes.elementAt(i)).subVector(columnIndexes) })
+
+    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) = subMatrix(rowIndexes.toSet(), columnIndexes.toSet())
 
     fun subMatrix(fromRowIndex: Int, fromColumnIndex: Int, toRowIndex: Int, toColumnIndex: Int) =
         subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
@@ -88,27 +80,20 @@ open class Matrix(values: Collection<Vector>) {
 
     fun swapColumns(columnIndex1: Int, columnIndex2: Int) {
         for (i in 0 until height)
-            swap(i, columnIndex1, i, columnIndex2)
+            this.swap(i, columnIndex1, i, columnIndex2)
     }
 
     fun swapRows(rowIndex1: Int, rowIndex2: Int) {
         for (j in 0 until width)
-            swap(rowIndex1, j, rowIndex2, j)
+            this.swap(rowIndex1, j, rowIndex2, j)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other is Matrix) {
-            if (height != other.height || width != other.width)
-                return false
-            for (i in 0 until height)
-                if (row(i) != other.row(i))
-                    return false
-            return true
-        }
-        return false
+    fun toList(): List<Double> {
+        val list = ArrayList<Double>()
+        for (row in data)
+            list.addAll(row)
+        return list
     }
-
-    override fun hashCode() = data.hashCode()
 
     override fun toString(): String {
         val result = StringBuilder()
@@ -117,5 +102,16 @@ open class Matrix(values: Collection<Vector>) {
         return result.toString()
     }
 
-    fun toList() = data.toList()
+    override fun contains(element: Double): Boolean {
+        for (row in data)
+            if (row.contains(element))
+                return true
+        return false
+    }
+
+    override fun containsAll(elements: Collection<Double>) = this.toList().containsAll(elements)
+
+    override fun isEmpty() = if (data.isEmpty()) true else data.first().isEmpty()
+
+    override fun iterator(): Iterator<Double> = this.toList().iterator()
 }

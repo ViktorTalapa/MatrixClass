@@ -24,7 +24,7 @@ class SquareMatrix(values: Collection<MathVector>) : Matrix(values) {
 
     override operator fun times(scalar: Number) = SquareMatrix(super.times(scalar))
 
-    override operator fun div(scalar: Number) = SquareMatrix(super.times(scalar))
+    override operator fun div(scalar: Number) = SquareMatrix(super.div(scalar))
 
     override operator fun unaryPlus() = this.times(1)
 
@@ -42,9 +42,19 @@ class SquareMatrix(values: Collection<MathVector>) : Matrix(values) {
         if (height == 2)
             return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
         val copy = this.copy()
-        val sign = Matrices.formRowEchelon(copy)
+        val sign = formRowEchelon(copy)
         return sign * copy.diagonalValues().product()
     }
 
     fun trace() = diagonalValues().sum()
+
+    companion object {
+
+        fun diagonal(values: Collection<Number>) = SquareMatrix(Matrix.diagonal(values))
+
+        fun identity(order: Int) = SquareMatrix(Matrix.identity(order))
+
+        fun random(order: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
+            SquareMatrix(random(order, order, minValue, maxValue))
+    }
 }

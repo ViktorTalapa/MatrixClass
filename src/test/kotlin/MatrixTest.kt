@@ -93,8 +93,8 @@ class MatrixTest : MyTest() {
 
     @Test
     fun identity() {
-        val I = Matrices.identity(5)
-        val R = Matrices.random(5, 5)
+        val I = Matrix.identity(5)
+        val R = Matrix.random(5, 5)
         assertEquals(R, R * I)
         assertEquals(R, I * R)
         assertEquals(I, I.transpose())
@@ -106,7 +106,7 @@ class MatrixTest : MyTest() {
         assertEquals(-22.0, K.determinant(), epsilon)
         assertEquals(0.0, B.determinant(), epsilon)
         assertEquals(-2.5088, SquareMatrix(A.subMatrix(0..2, 0..2)).determinant(), epsilon)
-        assertEquals(1.0, Matrices.identity(5).determinant(), epsilon)
+        assertEquals(1.0, SquareMatrix.identity(5).determinant(), epsilon)
     }
 
    @Test

@@ -3,7 +3,7 @@ import org.junit.Test
 
 class VectorTest : MyTest() {
 
-    private val u = MathVector(listOf(1, 2, 3, 4, 5))
+    private val u = MathVector(1, 2, 3, 4, 5)
     private val v = MathVector(doubleArrayOf(5.0, 5.8, 6.1, 5.87, 2.3))
 
     @Test
@@ -16,7 +16,7 @@ class VectorTest : MyTest() {
 
     @Test
     fun plus() {
-        assertEquals(MathVector(listOf(6.0, 7.8, 9.1, 9.87, 7.3)), u + v)
+        assertEquals(MathVector(6.0, 7.8, 9.1, 9.87, 7.3), u + v)
         assertEquals(u + v, v + u)
     }
 
@@ -35,20 +35,20 @@ class VectorTest : MyTest() {
     @Test
     fun unary() {
         assertEquals(u, +u)
-        assertEquals(MathVector(listOf(-1.0, -2.0, -3.0, -4.0, -5.0)), -u)
+        assertEquals(MathVector(-1.0, -2.0, -3.0, -4.0, -5.0), -u)
         assertEquals(u - v, -v + u)
     }
 
     @Test
     fun subVector() {
-        assertEquals(MathVector(listOf(3.0, 4.0, 5.0)), u.subVector(2, 4))
-        assertEquals(MathVector(listOf(2.0, 3.0, 4.0)), u.subVector(1..3))
-        assertEquals(MathVector(listOf(1.0, 4.0, 5.0)), u.subVector(sortedSetOf(0, 4, 3)))
+        assertEquals(MathVector(3.0, 4.0, 5.0), u.subVector(2, 4))
+        assertEquals(MathVector(2.0, 3.0, 4.0), u.subVector(1..3))
+        assertEquals(MathVector(1.0, 4.0, 5.0), u.subVector(sortedSetOf(0, 4, 3)))
     }
 
     @Test
     fun swap() {
         u.swap(0, 4)
-        assertEquals(MathVector(listOf(5.0, 2.0, 3.0, 4.0, 1.0)), u)
+        assertEquals(MathVector(5.0, 2.0, 3.0, 4.0, 1.0), u)
     }
 }

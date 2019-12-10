@@ -4,11 +4,9 @@ import org.junit.Test
 class MatrixTest : MyTest() {
 
     private val A = Matrix(
-        listOf(
-            MathVector(7.5, 8.3, 9.1, 8.0),
-            MathVector(4.1, 5.0, 6.1, 3.5),
-            MathVector(1.22, 2.56, 3.7, 9.2)
-        )
+        listOf(7.5, 8.3, 9.1, 8.0),
+        listOf(4.1, 5.0, 6.1, 3.5),
+        listOf(1.22, 2.56, 3.7, 9.2)
     )
 
     private val B = SquareMatrix(
@@ -22,7 +20,7 @@ class MatrixTest : MyTest() {
     @Test
     fun index() {
         assertEquals(8.0, B[2, 1], epsilon)
-        assertEquals(MathVector(4, 5, 6), B.row(1))
+        assertEquals(MathVector(listOf(4, 5, 6)), B.row(1))
         assertEquals(MathVector(listOf(9.1, 6.1, 3.7)), A.column(2))
         B[0, 2] = 15
         A[1, 0] = B[0, 2]

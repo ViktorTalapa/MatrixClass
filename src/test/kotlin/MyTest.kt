@@ -4,7 +4,7 @@ open class MyTest {
 
     val epsilon = 1e-10
 
-    fun assertEquals(expected: MathVector, actual: MathVector, epsilon: Double = this.epsilon) {
+   fun assertEquals(expected: MathVector, actual: MathVector, epsilon: Double = this.epsilon) {
         Assert.assertEquals(expected.size, actual.size)
         for(i in expected.indices)
             Assert.assertEquals(expected[i], actual[i], epsilon)

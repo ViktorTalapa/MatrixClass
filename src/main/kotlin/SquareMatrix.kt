@@ -1,26 +1,26 @@
-class SquareMatrix(values: Collection<MathVector>) : Matrix(values) {
+class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
 
     init {
         require(height == width) { "Square Matrix rows and columns must be in equal sizes." }
     }
 
-    constructor(values: Array<MathVector>) : this(values.asList())
-
     constructor(matrix: Matrix) : this(Array(matrix.height) { i -> matrix.row(i) })
+
+    constructor(values: Collection<MathVector>) : this(values.toTypedArray())
 
     constructor(values: Array<DoubleArray>) : this(Matrix(values))
 
     constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> MathVector(values[i]) })
 
-    constructor(values: List<Number>, rows: Int) : this(Matrix(values, rows))
+    constructor(values: List<Number>, rows: Int): this(Matrix(values, rows))
 
-    constructor(order: Int, value: Number = 0.0) : this(Matrix(order, order, value))
+    constructor(values: DoubleArray, rows: Int) : this(Matrix(values, rows))
 
-    operator fun plus(m: SquareMatrix) = SquareMatrix(super.plus(m))
+    operator fun plus(other: SquareMatrix) = SquareMatrix(super.plus(other))
 
-    operator fun minus(m: SquareMatrix) = SquareMatrix(super.minus(m))
+    operator fun minus(other: SquareMatrix) = SquareMatrix(super.minus(other))
 
-    operator fun times(m: SquareMatrix) = SquareMatrix(super.times(m))
+    operator fun times(other: SquareMatrix) = SquareMatrix(super.times(other))
 
     override operator fun times(scalar: Number) = SquareMatrix(super.times(scalar))
 
@@ -49,6 +49,11 @@ class SquareMatrix(values: Collection<MathVector>) : Matrix(values) {
     fun trace() = diagonalValues().sum()
 
     companion object {
+
+        /**
+         * Constructs a SquareMatrix of the same value (default is 0) with a given size.
+         */
+        fun generate(order: Int, value: Number = 0.0) = SquareMatrix(generate(order, order, value))
 
         fun diagonal(values: Collection<Number>) = SquareMatrix(Matrix.diagonal(values))
 

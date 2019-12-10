@@ -1,12 +1,15 @@
 import kotlin.random.Random
 
-data class MathVector(private val data: ArrayList<Double> = ArrayList()) : Collection<Double> by data {
+/**
+ * Vector class constructed from an array of Doubles.
+ * It also represents a row or column of a matrix.
+ */
+data class MathVector(private val data: DoubleArray) : Collection<Double> {
 
-    constructor(values: DoubleArray) : this(ArrayList(values.asList()))
+    override val size: Int
+        get() = data.size
 
     constructor(values: Collection<Number>) : this(DoubleArray(values.size) { i -> values.elementAt(i).toDouble() })
-
-    constructor(size: Int, value: Number = 0.0) : this(DoubleArray(size) { value.toDouble() })
 
     constructor(vararg values: Number) : this(values.asList())
 
@@ -46,6 +49,8 @@ data class MathVector(private val data: ArrayList<Double> = ArrayList()) : Colle
         this[index2] = temp
     }
 
+    fun toList() = data.toList()
+
     override fun toString(): String {
         val result = StringBuilder("| ")
         for (i in 0 until size)
@@ -53,8 +58,43 @@ data class MathVector(private val data: ArrayList<Double> = ArrayList()) : Colle
         return result.append('|').toString()
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other)
+            return true
+        if (javaClass != other?.javaClass)
+            return false
+
+        other as MathVector
+        if (!data.contentEquals(other.data))
+            return false
+        return true
+    }
+
+    override fun hashCode() = data.contentHashCode()
+
+    override fun contains(element: Double) = data.contains(element)
+
+    override fun containsAll(elements: Collection<Double>): Boolean {
+        for (element in elements)
+            if (!data.contains(element))
+                return false
+        return true
+    }
+
+    override fun isEmpty() = data.isEmpty()
+
+    override fun iterator() = data.iterator()
+
     companion object {
 
+        /**
+         * Constructs a Vector of the same value (default is 0) with a given size.
+         */
+        fun generate(size: Int, value: Number = 0.0) = MathVector(DoubleArray(size) { value.toDouble() })
+
+        /**
+         * Constructs a Vector of random values with a given size.
+         */
         fun random(size: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
             MathVector(DoubleArray(size) { Random.nextDouble(minValue.toDouble(), maxValue.toDouble()) })
     }

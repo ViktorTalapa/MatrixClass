@@ -1,8 +1,11 @@
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Collection<Double> {
+/**
+ * Matrix class constructed from an array of Vectors.
+ * It also represents a row or column of a matrix.
+ */
+open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
 
     val height: Int
         get() = data.size
@@ -17,10 +20,7 @@ open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Colle
         for (row in data)
             require(width == row.size) { "Matrix rows must be in equal sizes." }
     }
-
-    constructor(values: Collection<MathVector>) : this(ArrayList(values))
-
-    constructor(values: Array<MathVector>) : this(values.asList())
+    constructor(values: Collection<MathVector>) : this(values.toTypedArray())
 
     constructor(values: Array<DoubleArray>) : this(Array(values.size) { i -> MathVector(values[i]) })
 
@@ -32,17 +32,15 @@ open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Colle
 
     constructor(values: DoubleArray, rows: Int) : this(values.asList(), rows)
 
-    constructor(rows: Int, columns: Int, value: Number = 0.0) : this(Array(rows) { MathVector(columns, value) })
-
-    fun column(columnIndex: Int) = MathVector(DoubleArray(height) { i -> this[i, columnIndex] })
-
-    fun row(rowIndex: Int): MathVector = data[rowIndex]
-
     operator fun get(rowIndex: Int, columnIndex: Int) = data[rowIndex][columnIndex]
 
     operator fun set(rowIndex: Int, columnIndex: Int, element: Number) {
         data[rowIndex][columnIndex] = element
     }
+
+    fun column(columnIndex: Int) = MathVector(DoubleArray(height) { i -> this[i, columnIndex] })
+
+    fun row(rowIndex: Int) = data[rowIndex]
 
     open operator fun plus(other: Matrix) = Matrix(Array(height) { i -> row(i) + other.row(i) })
 
@@ -59,7 +57,7 @@ open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Colle
 
     open operator fun minus(other: Matrix) = this.plus(other.unaryMinus())
 
-    open operator fun div(scalar: Number) = this.times(1 / scalar.toDouble())
+    open operator fun div(scalar: Number) = this.times(1.0 / scalar.toDouble())
 
     open fun copy() = Matrix(Array(height) { i -> data[i].copy() })
 
@@ -68,10 +66,11 @@ open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Colle
     fun subMatrix(rowIndexes: Set<Int>, columnIndexes: Set<Int>) =
         Matrix(Array(rowIndexes.size) { i -> this.row(rowIndexes.elementAt(i)).subVector(columnIndexes) })
 
-    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) = subMatrix(rowIndexes.toSet(), columnIndexes.toSet())
+    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) =
+        this.subMatrix(rowIndexes.toSortedSet(), columnIndexes.toSortedSet())
 
     fun subMatrix(fromRowIndex: Int, fromColumnIndex: Int, toRowIndex: Int, toColumnIndex: Int) =
-        subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
+        this.subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
 
 
     fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
@@ -111,16 +110,50 @@ open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Colle
         return false
     }
 
-    override fun containsAll(elements: Collection<Double>) = this.toList().containsAll(elements)
+    override fun containsAll(elements: Collection<Double>) : Boolean {
+        for (element in elements)
+            if (!this.contains(element))
+                return false
+        return true
+    }
 
     override fun isEmpty() = if (data.isEmpty()) true else data.first().isEmpty()
 
-    override fun iterator(): Iterator<Double> = this.toList().iterator()
+    override fun iterator() = this.toList().iterator()
 
     companion object {
 
         /**
+         * Constructs a Matrix of the same value (default is 0) with a given size.
+         */
+        fun generate(rows: Int, columns: Int, value: Number = 0.0) =
+            Matrix(Array(rows) { MathVector.generate(columns, value) })
+
+        /**
+         * Constructs a Matrix of random values with a given size.
+         */
+        fun random(rows: Int, columns: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
+            Matrix(Array(rows) { MathVector.random(columns, minValue, maxValue) })
+
+        /**
+         * Constructs a diagonal Matrix from the given values.
+         */
+        fun diagonal(values: Collection<Number>): Matrix {
+            val result = generate(values.size, values.size)
+            for (i in values.indices)
+                result[i, i] = values.elementAt(i)
+            return result
+        }
+
+        /**
+         * Constructs an identity Matrix with a given size.
+         */
+        fun identity(order: Int) = diagonal(Array(order) { 1.0 }.asList())
+
+        /**
          * Transforms the given matrix to row echelon format.
+         * Can be used for determinant calculation.
+         *
          * @param a:        The input Matrix
          * @param epsilon:  Precision of double value comparison to 0 (default value is 1e-10)
          *
@@ -148,19 +181,5 @@ open class Matrix(private val data: ArrayList<MathVector> = ArrayList()) : Colle
             }
             return sign
         }
-
-        fun diagonal(values: Collection<Number>): Matrix {
-            val result = Matrix(values.size, values.size, 0)
-            for (i in values.indices)
-                result[i, i] = values.elementAt(i)
-            return result
-        }
-
-        fun identity(order: Int): Matrix {
-            return diagonal(Array(order) { 1 }.asList())
-        }
-
-        fun random(rows: Int, columns: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
-            Matrix(Array(rows) { i -> MathVector.random(columns, minValue, maxValue) })
     }
 }

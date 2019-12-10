@@ -9,7 +9,7 @@ object Main {
         println("Here is a 5x5 Random Matrix:")
         println(SquareMatrix.random(5))
         println("Here is a 4x4 Matrix of 3:")
-        val a = Matrix(4, 4, 3)
-        print(a.toString())
+        val a = SquareMatrix.generate(4, 3)
+        println(a.toString())
     }
 }

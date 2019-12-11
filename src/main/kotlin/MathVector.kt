@@ -23,7 +23,8 @@ data class MathVector(private val data: DoubleArray) : Collection<Double> {
 
     operator fun times(scalar: Number) = MathVector(DoubleArray(size) { i -> this[i] * scalar.toDouble() })
 
-    operator fun times(other: MathVector) = (DoubleArray(size) { i -> this[i] * other[i] }).reduce { acc, it -> acc + it }
+    operator fun times(other: MathVector) =
+        (DoubleArray(size) { i -> this[i] * other[i] }).reduce { acc, it -> acc + it }
 
     operator fun unaryPlus() = this.times(1)
 
@@ -93,9 +94,15 @@ data class MathVector(private val data: DoubleArray) : Collection<Double> {
         fun generate(size: Int, value: Number = 0.0) = MathVector(DoubleArray(size) { value.toDouble() })
 
         /**
-         * Constructs a Vector of random values with a given size.
+         * Constructs a Vector of random Double values with a given size.
          */
         fun random(size: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
             MathVector(DoubleArray(size) { Random.nextDouble(minValue.toDouble(), maxValue.toDouble()) })
+
+        /**
+         * Constructs a Vector of random Int values with a given size.
+         */
+        fun randomInts(size: Int, minValue: Int = Int.MIN_VALUE, maxValue: Int = Int.MAX_VALUE) =
+            MathVector(IntArray(size) { Random.nextInt(minValue, maxValue) }.asList())
     }
 }

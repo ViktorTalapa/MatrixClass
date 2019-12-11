@@ -12,9 +12,21 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
 
     constructor(vararg values: Collection<Number>) : this(Array(values.size) { i -> MathVector(values[i]) })
 
-    constructor(values: List<Number>, rows: Int): this(Matrix(values, rows))
+    constructor(values: List<Number>, rows: Int) : this(Matrix(values, rows))
 
     constructor(values: DoubleArray, rows: Int) : this(Matrix(values, rows))
+
+    operator fun not(): SquareMatrix {
+        val aug = Matrix.generate(height, 2 * width)
+        for (i in 0 until height)
+            for (j in 0 until width) {
+                aug[i, j] = this[i, j]
+                if (i == j)
+                    aug[i, width + j] = 1.0
+            }
+        require(Matrices.reducedRowEchelonForm(aug) != 0.0) { "Inverse does not exist for this matrix." }
+        return SquareMatrix(aug.subMatrix(0 until height, width until 2 * width))
+    }
 
     operator fun plus(other: SquareMatrix) = SquareMatrix(super.plus(other))
 
@@ -36,17 +48,15 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
 
     fun diagonalValues() = MathVector(DoubleArray(height) { i -> this[i, i] })
 
+    fun trace() = diagonalValues().sum()
+
     fun determinant(): Double {
         if (height == 1)
             return this[0, 0]
         if (height == 2)
             return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
-        val copy = this.copy()
-        val sign = formRowEchelon(copy)
-        return sign * copy.diagonalValues().product()
+        return Matrices.reducedRowEchelonForm(this.copy())
     }
-
-    fun trace() = diagonalValues().sum()
 
     companion object {
 
@@ -55,11 +65,16 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
          */
         fun generate(order: Int, value: Number = 0.0) = SquareMatrix(generate(order, order, value))
 
-        fun diagonal(values: Collection<Number>) = SquareMatrix(Matrix.diagonal(values))
-
-        fun identity(order: Int) = SquareMatrix(Matrix.identity(order))
-
+        /**
+         * Constructs a SquareMatrix of random values with a given size.
+         */
         fun random(order: Int, minValue: Number = Double.MIN_VALUE, maxValue: Number = Double.MAX_VALUE) =
             SquareMatrix(random(order, order, minValue, maxValue))
+
+        /**
+         * Constructs a SquareMatrix of random Int values with a given size.
+         */
+        fun randomInts(order: Int, minValue: Int = Int.MIN_VALUE, maxValue: Int = Int.MAX_VALUE) =
+            SquareMatrix(randomInts(order, order, minValue, maxValue))
     }
 }

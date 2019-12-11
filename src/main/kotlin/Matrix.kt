@@ -1,6 +1,3 @@
-import kotlin.math.abs
-import kotlin.math.min
-
 /**
  * Matrix class constructed from an array of Vectors.
  * It also represents a row or column of a matrix.
@@ -20,6 +17,7 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
         for (row in data)
             require(width == row.size) { "Matrix rows must be in equal sizes." }
     }
+
     constructor(values: Collection<MathVector>) : this(values.toTypedArray())
 
     constructor(values: Array<DoubleArray>) : this(Array(values.size) { i -> MathVector(values[i]) })
@@ -63,15 +61,13 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
 
     open fun transpose() = Matrix(Array(width) { i -> DoubleArray(height) { j -> data[j][i] } })
 
-    fun subMatrix(rowIndexes: Set<Int>, columnIndexes: Set<Int>) =
-        Matrix(Array(rowIndexes.size) { i -> this.row(rowIndexes.elementAt(i)).subVector(columnIndexes) })
+    fun addRowToRow(addRowIndex: Int, toRowIndex: Int, times: Number = 1.0) {
+        data[toRowIndex] = data[toRowIndex] + data[addRowIndex] * times
+    }
 
-    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) =
-        this.subMatrix(rowIndexes.toSortedSet(), columnIndexes.toSortedSet())
-
-    fun subMatrix(fromRowIndex: Int, fromColumnIndex: Int, toRowIndex: Int, toColumnIndex: Int) =
-        this.subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
-
+    fun multiplyRow(rowIndex: Int, scalar: Number) {
+        data[rowIndex] = data[rowIndex] * scalar
+    }
 
     fun swap(rowIndex1: Int, columnIndex1: Int, rowIndex2: Int, columnIndex2: Int) {
         val temp = this[rowIndex1, columnIndex1]
@@ -88,6 +84,15 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
         for (j in 0 until width)
             this.swap(rowIndex1, j, rowIndex2, j)
     }
+
+    fun subMatrix(rowIndexes: Set<Int>, columnIndexes: Set<Int>) =
+        Matrix(Array(rowIndexes.size) { i -> this.row(rowIndexes.elementAt(i)).subVector(columnIndexes) })
+
+    fun subMatrix(rowIndexes: IntRange, columnIndexes: IntRange) =
+        this.subMatrix(rowIndexes.toSortedSet(), columnIndexes.toSortedSet())
+
+    fun subMatrix(fromRowIndex: Int, fromColumnIndex: Int, toRowIndex: Int, toColumnIndex: Int) =
+        this.subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
 
     fun toList(): List<Double> {
         val list = ArrayList<Double>()
@@ -110,12 +115,7 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
         return false
     }
 
-    override fun containsAll(elements: Collection<Double>) : Boolean {
-        for (element in elements)
-            if (!this.contains(element))
-                return false
-        return true
-    }
+    override fun containsAll(elements: Collection<Double>) = this.toList().containsAll(elements)
 
     override fun isEmpty() = if (data.isEmpty()) true else data.first().isEmpty()
 
@@ -136,50 +136,9 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
             Matrix(Array(rows) { MathVector.random(columns, minValue, maxValue) })
 
         /**
-         * Constructs a diagonal Matrix from the given values.
+         * Constructs a Matrix of random Int values with a given size.
          */
-        fun diagonal(values: Collection<Number>): Matrix {
-            val result = generate(values.size, values.size)
-            for (i in values.indices)
-                result[i, i] = values.elementAt(i)
-            return result
-        }
-
-        /**
-         * Constructs an identity Matrix with a given size.
-         */
-        fun identity(order: Int) = diagonal(Array(order) { 1.0 }.asList())
-
-        /**
-         * Transforms the given matrix to row echelon format.
-         * Can be used for determinant calculation.
-         *
-         * @param a:        The input Matrix
-         * @param epsilon:  Precision of double value comparison to 0 (default value is 1e-10)
-         *
-         * @return 0 if the matrix is singular (and therefore the determinant is 0) and 1 or -1 representing the change
-         * of the sign of the determinant.
-         */
-        fun formRowEchelon(a: Matrix, epsilon: Double = 1e-10): Int {
-            var sign = 1
-            for (p in 0 until min(a.height, a.width)) {
-                var max = p
-                for (i in p + 1 until a.height)
-                    if (abs(a[i, p]) > abs(a[max, p]))
-                        max = i
-                if (max != p) {
-                    a.swapRows(p, max)
-                    sign = -sign
-                }
-                if (abs(a[p, p]) <= epsilon)
-                    return 0
-                for (i in p + 1 until a.height) {
-                    val factor = a[i, p] / a[p, p]
-                    for (j in p until a.width)
-                        a[i, j] -= a[p, j] * factor
-                }
-            }
-            return sign
-        }
+        fun randomInts(rows: Int, columns: Int, minValue: Int = Int.MIN_VALUE, maxValue: Int = Int.MAX_VALUE) =
+            Matrix(Array(rows) { MathVector.randomInts(columns, minValue, maxValue) })
     }
 }

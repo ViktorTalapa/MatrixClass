@@ -110,7 +110,7 @@ class MatrixTest : MyTest() {
 
     @Test
     fun inverse() {
-        assertEquals(!C, SquareMatrix(listOf(0.75, 0.5, 0.25, 0.5, 1.0, 0.5, 0.25, 0.5, 0.75), 3))
+        assertEquals(SquareMatrix(listOf(0.75, 0.5, 0.25, 0.5, 1.0, 0.5, 0.25, 0.5, 0.75), 3), !C)
         assertEquals(Matrices.identity(C.height), C * !C)
     }
 
@@ -129,5 +129,16 @@ class MatrixTest : MyTest() {
         assertEquals(!C * !C * !C, C.pow(-3))
         assertEquals(C, C.pow(3) * C.pow(-2))
         assertEquals(C.pow(4), C.pow(2).pow(2))
+    }
+
+    @Test
+    fun linearEquations() {
+        assertEquals(
+            Matrices.solveLinearEquations(
+                SquareMatrix(listOf(2, 1, -1, -3, -1, 2, -2, 1, 2), 3),
+                MathVector(8, -11, -3)
+            )!!,
+            MathVector(2, 3, -1)
+        )
     }
 }

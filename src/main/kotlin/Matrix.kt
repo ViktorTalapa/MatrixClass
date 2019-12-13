@@ -1,6 +1,5 @@
 /**
  * Matrix class constructed from an array of Vectors.
- * It also represents a row or column of a matrix.
  */
 open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
 

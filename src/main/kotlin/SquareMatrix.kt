@@ -48,21 +48,18 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
             return this[0, 0]
         if (height == 2)
             return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
-        return Matrices.reducedRowEchelonForm(this.copy())
+        return Matrices.formReducedRowEchelon(this.copy())
     }
 
     /**
-     * Inverse
+     * Inverse matrix
+     *
+     * @return      The inverse if exists, null matrix otherwise
      */
     operator fun not(): SquareMatrix {
-        val aug = Matrix.generate(height, 2 * width)
-        for (i in 0 until height)
-            for (j in 0 until width) {
-                aug[i, j] = this[i, j]
-                if (i == j)
-                    aug[i, width + j] = 1.0
-            }
-        require(Matrices.reducedRowEchelonForm(aug) != 0.0) { "Inverse does not exist for this matrix." }
+        val aug = Matrices.augmented(this, Matrices.identity(height))
+        if (Matrices.formReducedRowEchelon(aug) == 0.0)
+            return generate(this.height)
         return SquareMatrix(aug.subMatrix(0 until height, width until 2 * width))
     }
 

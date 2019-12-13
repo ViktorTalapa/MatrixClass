@@ -46,7 +46,7 @@ class MatrixTest : MyTest() {
         assertEquals(Matrix(listOf(5, 10, 15, 20, 25, 30, 35, 40, 45), 3), B * 5)
         assertEquals(A * 2, 2.0 * A)
         assertEquals(
-            Matrix(listOf(19.36, 25.98, 32.4, 42.6, 57.82, 73.56, 89.1, 104.7, 96.28, 121.14, 145.8, 166.8),3),
+            Matrix(listOf(19.36, 25.98, 32.4, 42.6, 57.82, 73.56, 89.1, 104.7, 96.28, 121.14, 145.8, 166.8), 3),
             B * A
         )
     }
@@ -78,13 +78,15 @@ class MatrixTest : MyTest() {
 
     @Test
     fun transpose() {
-        val T = Matrix(
-            listOf(7.5, 4.1, 1.22),
-            listOf(8.3, 5.0, 2.56),
-            listOf(9.1, 6.1, 3.7),
-            listOf(8.0, 3.5, 9.2)
+        assertEquals(
+            Matrix(
+                listOf(7.5, 4.1, 1.22),
+                listOf(8.3, 5.0, 2.56),
+                listOf(9.1, 6.1, 3.7),
+                listOf(8.0, 3.5, 9.2)
+            ),
+            A.transpose()
         )
-        assertEquals(T, A.transpose())
         assertEquals(B, B.transpose().transpose())
     }
 
@@ -109,6 +111,7 @@ class MatrixTest : MyTest() {
     @Test
     fun inverse() {
         assertEquals(!C, SquareMatrix(listOf(0.75, 0.5, 0.25, 0.5, 1.0, 0.5, 0.25, 0.5, 0.75), 3))
+        assertEquals(Matrices.identity(C.height), C * !C)
     }
 
     @Test

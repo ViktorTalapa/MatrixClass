@@ -69,11 +69,11 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
     /**
      * Power
      */
-    fun pow(p: Int) : SquareMatrix {
-         val base : SquareMatrix = when {
-             p > 0 -> this
-             p < 0 -> !this
-             else -> Matrices.identity(height)
+    fun pow(p: Int): SquareMatrix {
+        val base: SquareMatrix = when {
+            p > 0 -> this
+            p < 0 -> !this
+            else -> Matrices.identity(height)
         }
         var result = base
         for (i in 2..abs(p))

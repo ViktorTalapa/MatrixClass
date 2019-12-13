@@ -115,7 +115,7 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
         return false
     }
 
-    override fun containsAll(elements: Collection<Double>) : Boolean {
+    override fun containsAll(elements: Collection<Double>): Boolean {
         for (element in elements)
             if (!this.contains(element))
                 return false
@@ -124,7 +124,7 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
 
     override fun isEmpty(): Boolean = if (data.isEmpty()) true else data.first().isEmpty()
 
-    private inner class MatrixIterator: Iterator<Double> {
+    private inner class MatrixIterator : Iterator<Double> {
         var posX: Int = 0
         var posY: Int = 0
 

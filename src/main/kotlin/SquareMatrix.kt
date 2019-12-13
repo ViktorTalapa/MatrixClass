@@ -73,7 +73,7 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
          val base : SquareMatrix = when {
              p > 0 -> this
              p < 0 -> !this
-             else -> generate(height, 1)
+             else -> Matrices.identity(height)
         }
         var result = base
         for (i in 2..abs(p))

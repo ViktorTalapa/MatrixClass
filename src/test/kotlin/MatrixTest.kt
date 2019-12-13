@@ -120,9 +120,11 @@ class MatrixTest : MyTest() {
 
     @Test
     fun power() {
-        assertEquals(SquareMatrix.generate(B.height, 1), B.pow(0))
+        assertEquals(Matrices.identity(B.height), B.pow(0))
         assertEquals(B, B.pow(1))
-        assertEquals(!C, C.pow(-1))
-        assertEquals(SquareMatrix(listOf(468, 576, 684, 1062, 1305, 1548, 1656, 2034, 2412), 3), B.pow(3))
+        assertEquals(B * B, B.pow(2))
+        assertEquals(!C * !C * !C, C.pow(-3))
+        assertEquals(C, C.pow(3) * C.pow(-2))
+        assertEquals(C.pow(4), C.pow(2).pow(2))
     }
 }

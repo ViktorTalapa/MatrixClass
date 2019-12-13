@@ -94,18 +94,18 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
     fun subMatrix(fromRowIndex: Int, fromColumnIndex: Int, toRowIndex: Int, toColumnIndex: Int) =
         this.subMatrix(fromRowIndex..toRowIndex, fromColumnIndex..toColumnIndex)
 
-    fun toList(): List<Double> {
-        val list = ArrayList<Double>()
-        for (row in data)
-            list.addAll(row)
-        return list
-    }
-
     override fun toString(): String {
         val result = StringBuilder()
         for (row in data)
             result.append(row.toString()).append(System.lineSeparator())
         return result.toString()
+    }
+
+    fun toList(): List<Double> {
+        val list = ArrayList<Double>()
+        for (row in data)
+            list.addAll(row)
+        return list
     }
 
     override fun contains(element: Double): Boolean {
@@ -115,11 +115,33 @@ open class Matrix(private val data: Array<MathVector>) : Collection<Double> {
         return false
     }
 
-    override fun containsAll(elements: Collection<Double>) = this.toList().containsAll(elements)
+    override fun containsAll(elements: Collection<Double>) : Boolean {
+        for (element in elements)
+            if (!this.contains(element))
+                return false
+        return true
+    }
 
-    override fun isEmpty() = if (data.isEmpty()) true else data.first().isEmpty()
+    override fun isEmpty(): Boolean = if (data.isEmpty()) true else data.first().isEmpty()
 
-    override fun iterator() = this.toList().iterator()
+    private inner class MatrixIterator: Iterator<Double> {
+        var posX: Int = 0
+        var posY: Int = 0
+
+        override fun hasNext(): Boolean = (posX < height - 1 || posY < width)
+
+        override fun next(): Double {
+            if (posY == width) {
+                posX++
+                posY = 0
+            }
+            if (posX == height)
+                throw NoSuchElementException()
+            return data[posX][posY++]
+        }
+    }
+
+    override fun iterator(): Iterator<Double> = MatrixIterator()
 
     companion object {
 

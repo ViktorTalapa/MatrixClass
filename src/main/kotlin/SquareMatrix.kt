@@ -1,3 +1,5 @@
+import kotlin.math.abs
+
 class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
 
     init {
@@ -15,18 +17,6 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
     constructor(values: List<Number>, rows: Int) : this(Matrix(values, rows))
 
     constructor(values: DoubleArray, rows: Int) : this(Matrix(values, rows))
-
-    operator fun not(): SquareMatrix {
-        val aug = Matrix.generate(height, 2 * width)
-        for (i in 0 until height)
-            for (j in 0 until width) {
-                aug[i, j] = this[i, j]
-                if (i == j)
-                    aug[i, width + j] = 1.0
-            }
-        require(Matrices.reducedRowEchelonForm(aug) != 0.0) { "Inverse does not exist for this matrix." }
-        return SquareMatrix(aug.subMatrix(0 until height, width until 2 * width))
-    }
 
     operator fun plus(other: SquareMatrix) = SquareMatrix(super.plus(other))
 
@@ -50,12 +40,45 @@ class SquareMatrix(values: Array<MathVector>) : Matrix(values) {
 
     fun trace() = diagonalValues().sum()
 
-    fun determinant(): Double {
+    /**
+     * Determinant
+     */
+    fun det(): Double {
         if (height == 1)
             return this[0, 0]
         if (height == 2)
             return this[0, 0] * this[1, 1] - this[0, 1] * this[1, 0]
         return Matrices.reducedRowEchelonForm(this.copy())
+    }
+
+    /**
+     * Inverse
+     */
+    operator fun not(): SquareMatrix {
+        val aug = Matrix.generate(height, 2 * width)
+        for (i in 0 until height)
+            for (j in 0 until width) {
+                aug[i, j] = this[i, j]
+                if (i == j)
+                    aug[i, width + j] = 1.0
+            }
+        require(Matrices.reducedRowEchelonForm(aug) != 0.0) { "Inverse does not exist for this matrix." }
+        return SquareMatrix(aug.subMatrix(0 until height, width until 2 * width))
+    }
+
+    /**
+     * Power
+     */
+    fun pow(p: Int) : SquareMatrix {
+         val base : SquareMatrix = when {
+             p > 0 -> this
+             p < 0 -> !this
+             else -> generate(height, 1)
+        }
+        var result = base
+        for (i in 2..abs(p))
+            result *= base
+        return result
     }
 
     companion object {

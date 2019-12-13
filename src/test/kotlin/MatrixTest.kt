@@ -28,6 +28,14 @@ class MatrixTest : MyTest() {
     }
 
     @Test
+    fun iterator() {
+        val list = ArrayList<Double>()
+        for (element in B)
+            list.add(element)
+        assertEquals(B.toList(), list)
+    }
+
+    @Test
     fun plus() {
         assertEquals(Matrix(listOf(3, 1, 3, 3, 7, 5, 7, 7, 11), 3), B + C)
         assertEquals(B + C, C + B)
@@ -91,11 +99,11 @@ class MatrixTest : MyTest() {
 
     @Test
     fun determinant() {
-        assertEquals(0.0, B.determinant(), epsilon)
-        assertEquals(4.0, C.determinant(), epsilon)
-        assertEquals(-22.0, SquareMatrix(listOf(2, 4, 8, 5), 2).determinant(), epsilon)
-        assertEquals(-2.5088, SquareMatrix(A.subMatrix(0..2, 0..2)).determinant(), epsilon)
-        assertEquals(1.0, Matrices.identity(5).determinant(), epsilon)
+        assertEquals(0.0, B.det(), epsilon)
+        assertEquals(4.0, C.det(), epsilon)
+        assertEquals(-22.0, SquareMatrix(listOf(2, 4, 8, 5), 2).det(), epsilon)
+        assertEquals(-2.5088, SquareMatrix(A.subMatrix(0..2, 0..2)).det(), epsilon)
+        assertEquals(1.0, Matrices.identity(5).det(), epsilon)
     }
 
     @Test
@@ -108,5 +116,13 @@ class MatrixTest : MyTest() {
         assertEquals(15.0, B.trace(), epsilon)
         assertEquals(C.trace(), C.transpose().trace(), epsilon)
         assertEquals((B * C).trace(), (C * B).trace(), epsilon)
+    }
+
+    @Test
+    fun power() {
+        assertEquals(SquareMatrix.generate(B.height, 1), B.pow(0))
+        assertEquals(B, B.pow(1))
+        assertEquals(!C, C.pow(-1))
+        assertEquals(SquareMatrix(listOf(468, 576, 684, 1062, 1305, 1548, 1656, 2034, 2412), 3), B.pow(3))
     }
 }

@@ -4,7 +4,7 @@ import kotlin.random.Random
  * Vector class constructed from an array of Doubles.
  * It also represents a row or column of a matrix.
  */
-data class MathVector(private val data: DoubleArray) : Collection<Double> {
+data class MathVector(private val data: DoubleArray) : Collection<Double> by data.asList() {
 
     override val size: Int
         get() = data.size
@@ -72,19 +72,6 @@ data class MathVector(private val data: DoubleArray) : Collection<Double> {
     }
 
     override fun hashCode() = data.contentHashCode()
-
-    override fun contains(element: Double) = data.contains(element)
-
-    override fun containsAll(elements: Collection<Double>): Boolean {
-        for (element in elements)
-            if (!data.contains(element))
-                return false
-        return true
-    }
-
-    override fun isEmpty() = data.isEmpty()
-
-    override fun iterator() = data.iterator()
 
     companion object {
 
